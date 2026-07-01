@@ -6,6 +6,9 @@ dist/
 .astro/
 .output/
 
+# Paid product artifacts (regenerate with tools/build-book-pdf.py)
+dist-book/
+
 # Logs
 *.log
 npm-debug.log*

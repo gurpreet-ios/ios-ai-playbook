@@ -9,19 +9,11 @@ export default defineConfig({
 			title: 'The Senior AI Engineering Playbook',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
 			sidebar: [
-				{ label: 'The Handbook', items: [{ autogenerate: { directory: 'handbook' } }] },
-				{ label: 'Prompt Library', items: [{ autogenerate: { directory: 'prompts' } }] },
-				{ label: 'ADRs', items: [{ autogenerate: { directory: 'adrs' } }] },
+				{ label: 'Get the book', link: '/pricing/' },
 				{
-					label: 'Architecture Breakdowns',
-					items: [{ autogenerate: { directory: 'architecture-breakdowns' } }],
+					label: 'Free sample chapters',
+					items: [{ autogenerate: { directory: 'handbook' } }],
 				},
-				{
-					label: 'Interview Playbooks',
-					items: [{ autogenerate: { directory: 'interview-playbooks' } }],
-				},
-				{ label: 'Sample Apps', items: [{ autogenerate: { directory: 'sample-apps' } }] },
-				{ label: 'Templates', items: [{ autogenerate: { directory: 'templates' } }] },
 			],
 		}),
 	],
