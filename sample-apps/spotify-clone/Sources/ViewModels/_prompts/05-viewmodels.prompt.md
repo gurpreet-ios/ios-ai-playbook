@@ -1,0 +1,1 @@
+Generate PlayerViewModel @MainActor @Observable. Inject AudioEngine. Observe state stream in init. Methods to play/pause. Generate HomeViewModel @MainActor @Observable. Inject TrackRepositoryProtocol. loadHome method.

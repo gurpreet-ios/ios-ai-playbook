@@ -1,0 +1,28 @@
+# Music App - Global Architecture Rules
+
+You are an expert iOS Engineer assisting with a 1-hour machine coding interview. We are building a Music App with offline support.
+You MUST adhere to the following architectural decisions that I have agreed upon with the interviewer:
+
+## 1. Concurrency (Swift 6)
+- Strict `async/await`. No GCD, no DispatchQueue, no closures.
+- Use `Sendable` types exclusively for data crossing actor boundaries.
+- The `AudioEngine` must be an `actor`.
+- All ViewModels must be `@MainActor`.
+
+## 2. State Management (iOS 17+)
+- Use the `@Observable` macro. Do NOT use `ObservableObject`, `@Published`, or Combine.
+- Use `AsyncStream` to pipe background actor state (like playback status) to the MainActor view models.
+
+## 3. Data Persistence
+- Use `SwiftData` with the `@Model` macro. Do not use CoreData.
+- Cached tracks must store their `offlineFileURL`.
+
+## 4. Architecture (MVVM)
+- The View is a stateless renderer. It must only call functions on the ViewModel.
+- The ViewModel is the brain. It talks to Repositories and Services.
+- Use Protocol-Based Dependency Injection (e.g., `TrackRepositoryProtocol`).
+
+## 5. Accessibility (A11y)
+- Every SwiftUI view must be accessible by default.
+- Use `.accessibilityLabel`, `.accessibilityHint`, and `.accessibilityAddTraits` on custom components.
+- Do not hardcode `.font(.system(size:))`. Use Semantic Dynamic Type (e.g., `.font(.headline)`).
