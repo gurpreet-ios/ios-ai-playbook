@@ -18,7 +18,7 @@ public struct NowPlayingView: View {
                 .aspectRatio(1.0, contentMode: .fit)
                 .padding(.horizontal, 40)
                 .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-                .accessibilityLabel(viewModel.currentTrack != nil ? "Album Art for \\(viewModel.currentTrack!.title)" : "No Album Art")
+                .accessibilityLabel(viewModel.currentTrack.map { "Album Art for \($0.title)" } ?? "No Album Art")
                 .accessibilityAddTraits(.isImage)
             
             VStack(spacing: 8) {

@@ -32,3 +32,6 @@ Thumbs.db
 # Xcode user state
 xcuserdata/
 *.xcuserstate
+
+# SwiftPM build artifacts
+.build/

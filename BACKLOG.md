@@ -93,8 +93,13 @@ Machine coding: image cache w/ TTL, debounced search, pagination, download manag
 ### 7. Prompt library 18 → 40–60 · P2 · Med
 Rule: every prompt referenced in a chapter exists; every prompt is referenced by a chapter. Organize to mirror the Part structure.
 
-### 8. Sample apps · P2 · Small–Med
-Add tests (the book preaches testing; the apps ship none), fill `music-interview-app/Sources/Views/Components/` (empty), verify all three compile, add a CI job that builds them.
+### 8. Sample apps · **P1 (upgraded)** · Med
+**2026-07-02 build verification: none of the three apps compiled.** All three manifests declared `Tests/` dirs that didn't exist (fixed — each app now has a Swift Testing smoke suite). Beyond that:
+
+- **`music-interview-app` — ✅ repaired 2026-07-02.** Builds for iOS Simulator and its test suite passes. Fixes: reconciled `NetworkClientProtocol` (DTO-returning domain methods), added `fetchTracks()` to the repository, gave `PlayerViewModel` the surface `NowPlayingView` binds to (`currentTrack`, `isPlaying`, `togglePlayPause`, `playNext`, `playPrevious` + queue), made `AudioEngine.setupAudioSession()` `nonisolated` and added `stop()`, fixed the composition root (was reading `@Environment(\.modelContext)` in `init` → container-less context at runtime), fixed a broken string interpolation in an accessibility label.
+- **`spotify-clone` — ❌ ~6 errors**, same flavor: App passes `baseURL:` its `NetworkClient` doesn't accept, `NetworkClientProtocol` not in scope in `TrackRepository`, `fetchRecentlyPlayed` missing from the repo protocol, the same `setupAudioSession()` actor-isolation error, `stateObservationTask` touched from a nonisolated context (likely `deinit`), `play(track:)` vs `play(url:)` label mismatch.
+- **`uber-clone` — ❌ ~50 errors**, generated per-file and never integrated: `LocationUpdate` and `WebSocketManager` each declared twice, repo protocols don't match implementations (`fetchActiveTrip`/`estimateFare`/`streamDriverLocation`/`fetchNearbyDrivers` missing), Views bound to ViewModel members that don't exist (`cameraPosition`, `pickupText`, `route`, `driverName`, `vehicleInfo`, `preview`, `onAppear`, `startTracking`), `TripStatus.searching` used but the enum case is `.requested`, `Trip`/`Driver` not `Decodable`/`Sendable` where the network client needs them, `Trip` initializer signature drift. This is a redesign-level repair — treat it as its own work item.
+- After repairs: sync each app's `_prompts/` with the final APIs (music-interview-app's `03-repositories.prompt.md` updated 2026-07-02; audit the others), fill `music-interview-app/Sources/Views/Components/` (empty), add a CI job that builds all three + runs tests.
 
 ### 9. Site CI · P2 · Small
 Port `.github/workflows/site.yml` + link-check from the Backend Edition. Also fix placeholder URLs in `site/astro.config.mjs` if present.

@@ -6,6 +6,7 @@ Your task is to create a repository that manages `Track` data, abstracting the d
 
 **Requirements**:
 1. Define a `TrackRepositoryProtocol` with the following methods:
+   - `fetchTracks() async throws -> [Track]`
    - `getTrack(id: UUID) async throws -> Track`
    - `downloadTrack(id: UUID) async throws`
 2. Implement a concrete `TrackRepository` class that conforms to this protocol.

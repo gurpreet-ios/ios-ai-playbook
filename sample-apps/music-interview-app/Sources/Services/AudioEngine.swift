@@ -13,6 +13,7 @@ public protocol AudioEngineProtocol: Sendable {
     func play(url: URL) async
     func pause() async
     func resume() async
+    func stop() async
 }
 
 public actor AudioEngine: AudioEngineProtocol {
@@ -26,12 +27,13 @@ public actor AudioEngine: AudioEngineProtocol {
         let (stream, continuation) = AsyncStream.makeStream(of: PlaybackState.self)
         self.playbackStateStream = stream
         self.stateContinuation = continuation
-        
+
         setupAudioSession()
         continuation.yield(.stopped)
     }
 
-    private func setupAudioSession() {
+    // Touches no actor state, so it can stay callable from the synchronous init.
+    private nonisolated func setupAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
@@ -44,9 +46,9 @@ public actor AudioEngine: AudioEngineProtocol {
         let playerItem = AVPlayerItem(url: url)
         let newPlayer = AVPlayer(playerItem: playerItem)
         self.player = newPlayer
-        
+
         setupObservations(for: newPlayer)
-        
+
         newPlayer.play()
     }
 
@@ -58,12 +60,20 @@ public actor AudioEngine: AudioEngineProtocol {
         player?.play()
     }
 
+    public func stop() {
+        timeControlStatusObservation?.invalidate()
+        timeControlStatusObservation = nil
+        player?.pause()
+        player = nil
+        stateContinuation?.yield(.stopped)
+    }
+
     private func setupObservations(for player: AVPlayer) {
         timeControlStatusObservation?.invalidate()
-        
+
         // Observers can capture the continuation since it's Sendable
         let continuation = self.stateContinuation
-        
+
         timeControlStatusObservation = player.observe(\.timeControlStatus, options: [.new]) { observedPlayer, _ in
             switch observedPlayer.timeControlStatus {
             case .playing:
