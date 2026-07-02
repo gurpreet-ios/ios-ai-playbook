@@ -21,12 +21,13 @@ It is characterized by:
 
 A professional prompt is structured like a well-written API payload. It has a header (persona/intent), a body (context and instructions), and strict output formatting rules.
 
-### The 4 Pillars of a Production Prompt
+### The 5 Pillars of a Production Prompt
 
 1. **The System Persona:** Who is the AI? What are its intrinsic biases?
 2. **The Context Injection Area:** The exact spot where the script/agent injects the relevant files.
 3. **The Execution Constraints:** The "Do Nots." (e.g., "Do not use implicit unwrapping," "Do not alter the database schema").
 4. **The Output Schema:** The exact format you expect back. (e.g., "Output ONLY a valid JSON object," "Format the response as a GitHub PR review comment").
+5. **The Review Hook:** An instruction forcing the AI to explain its key decisions *before* (or alongside) the code — "State where the state lives, what owns the lifecycle, and why, before showing the implementation." You verify the reasoning, not just the syntax; if the explanation is wrong, reject the code without reading it.
 
 ## The Shift in Mentality
 

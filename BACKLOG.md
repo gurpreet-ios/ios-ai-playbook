@@ -90,6 +90,12 @@ Each with the "AI Anchor Usage" section: modularization strategy, navigation/rou
 ### 6. Interview playbooks 3 → ~12 · P2 · Med
 Machine coding: image cache w/ TTL, debounced search, pagination, download manager. Architecture: offline-first chat (exists — deepen), photo feed, live-sports app. Code review: retain cycle (exists — deepen), data race, SwiftUI over-render. Full scripts, not 30-line stubs. **Note:** Ch 18 promises a 6-part format per playbook (Prompt / Expected Reasoning / Poor Answer / Great Answer / Follow-Up / Ideal Discussion transcript) — every playbook must actually follow it.
 
+**Alignment with a real vibe-coding interview rubric (2026-07-02, from a candidate prep guide for mobile-engineer vibe-coding interviews):**
+- **Add a fourth playbook category: `debugging/`.** Real interviews split ~50/50 between build-from-scratch and *debugging an unfamiliar codebase from a vague symptom* ("the app crashes on older devices", "the list stutters", "stale data after logout"). The playbook has the skills (Ch 16, discovery prompts) but no interview simulation: unfamiliar codebase + vague symptom → use the LLM to build context fast (don't read every file) → hypothesis → trace → fix → articulate root cause. Seed scenarios: feed scroll stutter, stale data after logout, crash on older devices.
+- **Every playbook's "Follow-Up" must be a mid-interview extension** (add offline mode / pagination / a new UI state) — interviewers test whether you keep driving the LLM into new territory without breaking the existing design.
+- **Ch 18: name the two question types explicitly** (build-from-scratch vs. debug-the-unfamiliar-codebase) with the Plan → Review → Fix loop as the shared spine.
+- ✅ *Done 2026-07-02:* review hook added as the 5th prompt pillar (Ch 4 + Ch 24); edge-case probe checklist added to Ch 24.
+
 ### 7. Prompt library 18 → 40–60 · P2 · Med
 Rule: every prompt referenced in a chapter exists; every prompt is referenced by a chapter. Organize to mirror the Part structure.
 

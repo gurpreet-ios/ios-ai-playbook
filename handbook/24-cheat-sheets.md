@@ -8,12 +8,13 @@ This is the rapid-fire reference guide for AI-Native Engineering.
 
 ## 1. The Prompt Anatomy Cheat Sheet
 
-Every senior prompt must contain these 4 elements:
+Every senior prompt must contain these 5 elements:
 
 1. **Role:** `You are a Principal iOS Engineer.`
 2. **Context:** `Read @adrs/001-swiftdata-over-coredata.md and @adrs/002-observation-over-combine.md.`
 3. **Task:** `Implement the ProfileViewModel and ProfileView.`
 4. **Constraint:** `You MUST use @MainActor. Do NOT import UIKit.`
+5. **Review Hook:** `Before the code, explain where the state lives and who owns the task lifecycle — so I can verify the reasoning, not just the syntax.`
 
 ---
 
@@ -40,7 +41,23 @@ When the AI gives you a bug, don't just say "this crashed, fix it." Form a hypot
 
 ---
 
-## 4. The Agentic IDE Cheat Sheet (Cursor/Windsurf)
+## 4. The Edge-Case Probe Checklist
+
+LLMs ship the happy path. Before accepting any generated feature, probe every row — in an interview, probing these *out loud* is the skill being evaluated:
+
+| Probe | The question to ask |
+| :--- | :--- |
+| **Empty state** | What renders when the API returns zero items? |
+| **Loading & error states** | Is there a visible loading state? What does the user see on failure — and can they retry? |
+| **Offline / flaky network** | What happens on a dropped connection mid-scroll? Is anything cached? |
+| **Rapid input** | The user taps "Save" 4 times fast — is the work debounced or the request de-duplicated? |
+| **Lifecycle** | View dismissed (or app backgrounded) mid-request — are tasks canceled and subscriptions cleaned up? |
+| **Low memory / older devices** | Are images downsampled? Is any cache unbounded? |
+| **Rotation / Dynamic Type / dark mode / a11y** | Does the layout survive size changes and 200% text? Semantic colors? VoiceOver labels? |
+
+---
+
+## 5. The Agentic IDE Cheat Sheet (Cursor/Windsurf)
 
 - **`Cmd+K` (Inline Edit):** Best for localized algorithmic fixes (e.g., *"Refactor this map/filter chain to be O(N)"*).
 - **Composer / Flow:** Best for multi-file generation (e.g., *"Generate a Settings feature based on `@SettingsRFC.md`."*).
@@ -48,10 +65,10 @@ When the AI gives you a bug, don't just say "this crashed, fix it." Form a hypot
 
 ---
 
-## 5. The Interview Cheat Sheet
+## 6. The Interview Cheat Sheet
 
 When asked a System Design or Machine Coding question:
 1. **Define Constraints first:** DAU, Offline support, Security.
 2. **Establish the boundaries:** "The View will only talk to the ViewModel. The ViewModel will only talk to the Repository."
 3. **Analyze Tradeoffs openly:** "I am choosing SwiftData over CoreData for velocity, acknowledging we lose iOS 16 support."
-4. **Embrace the Adversary:** "If the network drops exactly when this function runs, we have a corrupted state. Here is how I will wrap it in a transaction."
+4. **Embrace the Adversary:** "If the network drops exactly when this function runs, we have a corrupted state. Here is how I will wrap it in a transaction." (Run the Edge-Case Probe Checklist above, out loud.)
