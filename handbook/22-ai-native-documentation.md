@@ -49,4 +49,4 @@ You can configure a GitHub Action to automatically run an LLM over the diff and 
 Architecture Decision Records (ADRs) are the most critical form of documentation. 
 If an AI suggests using `RxSwift` in a 2026 project, you simply reply: *"Read `adrs/003-reactive-frameworks.md`."* The AI reads the file, realizes you banned RxSwift in favor of async/await, and instantly corrects itself.
 
-Keep ADRs short. Status, Context, Decision, and Consequences. If it's longer than a page, the AI's attention mechanism might dilute its importance.
+Keep ADRs short. Status, Context, Decision, and Consequences. If it's longer than a page, the AI's attention mechanism might dilute its importance. (Draft new ones from a decision discussion with `prompts/documentation/adr-generator.md`.)

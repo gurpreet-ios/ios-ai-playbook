@@ -19,6 +19,7 @@ Because AI models are trained on historical data, their default behavior is ofte
 ### AI Prompting Strategy
 LLMs love to generate `CoreData` XML schemas and `NSManagedObject` subclasses. Stop them.
 * **Senior Prompt:** "Define the local database schema using `SwiftData`. Use the `@Model` macro. Ensure all relationships are explicitly marked with `@Relationship(deleteRule: .cascade)` where appropriate. DO NOT use CoreData or `NSManagedObject`."
+* **Inheriting a codebase?** Map the existing model graph first with `prompts/discovery/database-schema-extraction.md`; audit fetch performance with `prompts/performance/database-query-optimizer.md`.
 
 ---
 
@@ -68,6 +69,7 @@ Never let the AI put `URLSession` calls directly in a ViewModel. Force the use o
 
 ### AI Prompting Strategy
 * **Senior Prompt:** "Generate a generic API client using `URLSession.shared.data(from:)`. It must accept a generic `Codable` type and return it. Handle HTTP status codes (200-299) and map them to a custom `APIError` enum. The function must be `async throws`."
+* **Specifying the contract to the backend team:** `prompts/architecture/rest-api-contract.md` designs the API from the client's seat (payload budgets, cursors, idempotency). Stack decision: `adrs/008-networking-stack.md`.
 
 ---
 
@@ -155,4 +157,4 @@ For heavier sync loads (hundreds of rows, import jobs), the right tool is SwiftD
 
 > *"Implement `downloadTrack(id:)` in `TrackRepository` (`@MainActor`, Swift 6 strict concurrency). Rules: (1) file I/O and networking run inside `NetworkClient` (an actor) and return `Sendable` values only; (2) `Track` is a SwiftData `@Model` — it must never be captured by a detached task or sent across an isolation boundary; (3) all `ModelContext` access stays on the main actor; (4) if the compiler reports a Sendable violation, treat it as a design error — do NOT add `@unchecked Sendable` or `nonisolated(unsafe)` anywhere. Build with strict concurrency before presenting the diff."*
 
-The compiler is the one reviewer that never gets tired. Swift 6's strictness turns an entire class of AI-generated production crashes into build failures — your job in the prompt is to forbid the escape hatches that would turn them back.
+The compiler is the one reviewer that never gets tired. Swift 6's strictness turns an entire class of AI-generated production crashes into build failures — your job in the prompt is to forbid the escape hatches that would turn them back. (Generalized prompt: `prompts/architecture/offline-repository.md`; waiver policy: `adrs/013-strict-concurrency.md`.)

@@ -37,6 +37,7 @@ Apple's original imperative UI framework. While largely superseded by SwiftUI fo
 ### AI Prompting Strategy
 When refactoring or interacting with UIKit, you must explicitly tell the AI about the memory management model (ARC).
 * **Senior Prompt:** "Refactor this `UIViewController`. Extract the table view logic into a separate `UITableViewDataSource`. **CRITICAL:** Ensure all delegate references are `weak` to prevent retain cycles."
+* **Full migration prompt:** `prompts/refactoring/legacy-to-modern-migration.md`.
 
 ### Tradeoffs
 - **Pros:** Unparalleled control over the rendering pipeline; vast ecosystem of libraries.
@@ -54,7 +55,7 @@ Do not let the AI scatter `NavigationLink` throughout your views. Force it to us
 * **Architecture Rules:** Define a `enum Route: Hashable` and use a state-driven `NavigationPath` inside a router class.
 
 ### AI Prompting Strategy
-* **Senior Prompt:** "Implement navigation for this flow using iOS 16+ `NavigationStack` and `NavigationPath`. Create a `Router` class (Observable) that manages the path. The views should NOT contain any hardcoded `NavigationLink` destinations; they should only call `router.navigate(to:)`."
+* **Senior Prompt:** "Implement navigation for this flow using iOS 16+ `NavigationStack` and `NavigationPath`. Create a `Router` class (Observable) that manages the path. The views should NOT contain any hardcoded `NavigationLink` destinations; they should only call `router.navigate(to:)`." (Full scaffold: `prompts/architecture/router-scaffold.md`; decision record: `adrs/007-navigation-router.md`.)
 
 ---
 
@@ -154,4 +155,4 @@ struct PlaybackProgressBar: View {
 
 > *"Add a playback progress bar to `NowPlayingView`. Constraint: `currentTime` updates several times per second, so it must be read ONLY inside a new, minimal subview — `NowPlayingView.body` must not reference it directly. After generating, list every view whose body reads `currentTime` and justify each. Add a DEBUG `Self._printChanges()` to `NowPlayingView` and confirm it does not log during steady playback."*
 
-The verification clause is the senior move: "only the progress bar re-renders" is a checkable claim, so the prompt makes the AI check it.
+The verification clause is the senior move: "only the progress bar re-renders" is a checkable claim, so the prompt makes the AI check it. To audit an existing screen for this whole failure class, run `prompts/performance/render-isolation-audit.md`.

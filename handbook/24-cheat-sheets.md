@@ -43,7 +43,7 @@ When the AI gives you a bug, don't just say "this crashed, fix it." Form a hypot
 
 ## 4. The Edge-Case Probe Checklist
 
-LLMs ship the happy path. Before accepting any generated feature, probe every row — in an interview, probing these *out loud* is the skill being evaluated:
+LLMs ship the happy path. Before accepting any generated feature, probe every row — in an interview, probing these *out loud* is the skill being evaluated. (As a runnable review: `prompts/review/edge-case-probe.md`.)
 
 | Probe | The question to ask |
 | :--- | :--- |

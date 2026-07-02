@@ -108,7 +108,7 @@ struct PlayerQueueTests {
 
 **Step 2 — AI fills the bodies.** *"Implement these test bodies using `AudioEngineSpy`. Arrange with a three-track queue. Assert on `currentTrack` and on the spy's `playArguments`."*
 
-**Step 3 — AI implements against the failures.** For new features you reverse it: *"Here are the failing tests. Modify `PlayerViewModel` until they pass. Do not modify the tests."* That last sentence is not decoration — an unconstrained agent's cheapest path to green is editing the assertion, and agents find cheap paths.
+**Step 3 — AI implements against the failures.** For new features you reverse it: *"Here are the failing tests. Modify `PlayerViewModel` until they pass. Do not modify the tests."* That last sentence is not decoration — an unconstrained agent's cheapest path to green is editing the assertion, and agents find cheap paths. (The full three-phase workflow: `prompts/testing/names-first-tdd.md`.)
 
 The third test above is worth pausing on: `playPrefersOfflineURL` encodes a *business rule* (offline-first playback) that lives in one expression in the implementation (`track.offlineFileURL ?? track.streamURL`). If someone — human or model — later "simplifies" that expression, this named test is the only thing standing between the refactor and a silent regression of the app's core offline promise.
 

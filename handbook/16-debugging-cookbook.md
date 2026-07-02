@@ -6,6 +6,8 @@ Pasting a 500-line crash log into an LLM with the prompt "fix this" is a Junior 
 
 A Senior AI Engineer uses the AI as a sparring partner to test hypotheses. Below is a cookbook for tackling the most common bugs you will encounter, modeled around the scientific method: **Hypothesis → Investigation → Prompt → Fix → Regression**.
 
+The method is packaged as standing prompts: `prompts/debugging/codebase-mapping.md` (build the map before reading files — essential in unfamiliar code), `prompts/debugging/hypothesis-first-debug.md` (ranked hypotheses with the anti-sycophancy hook), and `prompts/discovery/legacy-code-archaeology.md` (when the codebase itself is the mystery).
+
 ---
 
 ## Bug 1: Unexplained Crash on Navigation (SwiftUI)

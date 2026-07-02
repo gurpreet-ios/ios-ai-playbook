@@ -19,6 +19,8 @@ You write a chain of specific prompts:
 3. **Generation:** "Implement the `CoreData` schema defined in the previous step."
 4. **Review:** "Audit the implementation for main-thread blocking."
 
+(The planning step is productionized as `prompts/planning/feature-breakdown.md`.)
+
 ## A Real-World Example: The "Refactor Chain"
 
 Let's look at a common scenario: Refactoring a massive 2,000-line "God Class" (e.g., `ProfileViewController`) into a clean architecture.

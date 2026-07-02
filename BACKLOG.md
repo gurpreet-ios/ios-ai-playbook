@@ -36,7 +36,7 @@ _Last updated: 2026-07-02._
 | 4 | ✅ ~~Deepen weakest chapters (Testing, A11y, Cheat Sheets, Breakdowns)~~ (done 2026-07-02: Ch 26 full rewrite w/ tautology audit + new prompt file; Ch 25 end-to-end workflow w/ before/after; Ch 24 three reference tables; 3 breakdowns → full blueprints + README index) | 2 | P1 | Med |
 | 5 | ✅ ~~ADR library 5 → ~12~~ (done 2026-07-02: ADRs 006–013 added — modularization, router, networking, image pipeline, DI, testing, deployment target, strict concurrency — all with AI Anchor Usage; README index updated) | 3 | P2 | Med |
 | 6 | ✅ ~~Interview playbooks 3 → ~12 with full scripts~~ (done 2026-07-02: 14 playbooks across 4 categories incl. new `debugging/`; 7-part format with Driving the LLM; Ch 18 + README aligned) | 3 | P2 | Med |
-| 7 | Prompt library 18 → 40–60, chapter-mapped | 3 | P2 | Med |
+| 7 | ✅ ~~Prompt library 18 → 40–60, chapter-mapped~~ (done 2026-07-02: 41 prompts; 20 new incl. debugging/ + release/ categories; 3 backend leftovers re-flavored to iOS; both invariants verified — every referenced prompt exists, every prompt chapter-referenced; README is a chapter-mapped index) | 3 | P2 | Med |
 | 8 | Sample apps: tests, compile CI, fill empty `Components/` | 3 | P2 | Small–Med |
 | 9 | Site CI (build + link check, port from Backend Edition) | 4 | P2 | Small |
 | 10 | Regenerate PDF + CHANGELOG after Phase 2 content lands | 4 | P3 | Small |

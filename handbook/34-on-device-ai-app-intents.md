@@ -87,6 +87,8 @@ Design rules (the AI will violate each unprompted):
 - **Entities and queries, not just verbs** — expose `TrackEntity` with an `EntityQuery` so "play *Karma Police*" can resolve a parameter against your library. Parameters make intents composable; composable intents make your app scriptable by the system's AI.
 - **Descriptions are prompts.** The `IntentDescription` is read by a model deciding whether to call you. Write it like a tool description from Chapter 21: what it does, when to use it, what it needs.
 
+(Scaffold the whole surface with `prompts/architecture/app-intents-surface.md`.)
+
 ## 4. Core ML: When You Bring Your Own Model
 
 The Foundation Models framework covers language tasks; **Core ML** covers everything else — audio classification for MusicApp's "hum to search," vision, embeddings for on-device semantic search, or a fine-tuned small model that outperforms the general one on your niche. The workflow AI accelerates: convert (PyTorch → `coremltools`, quantize to fit the memory budget you set in Chapter 33), validate numerically against the source model, then wrap it in an actor with the same protocol discipline as any engine:

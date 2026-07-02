@@ -19,7 +19,7 @@ Two objects hold strong references to each other, preventing them from ever bein
 
 ### The Fix Workflow
 1. **Detection:** Capture a Memory Graph in Xcode and find the cycle (e.g., `ViewModel -> Task -> ViewModel`).
-2. **Prompt:** *"I have a retain cycle in `ProfileViewModel.swift`. The network fetch closure is strongly capturing `self`. Rewrite this function to use `[weak self]` and safely handle the unwrapping."*
+2. **Prompt:** *"I have a retain cycle in `ProfileViewModel.swift`. The network fetch closure is strongly capturing `self`. Rewrite this function to use `[weak self]` and safely handle the unwrapping."* (Systematic sweep: `prompts/performance/memory-leak-detector.md`.)
 3. **Review:** Ensure the AI didn't blindly use `[unowned self]`, which causes crashes if the view is dismissed before the network call returns.
 
 ---
@@ -36,7 +36,7 @@ Heavy computations (JSON parsing, database sorting, large cryptographic hashing)
 ### The Fix Workflow
 1. **Detection:** Time Profiler shows a 500ms block on `Main Thread` originating from `parseUsers()`.
 2. **Prompt:** *"The `parseUsers(data:)` function is blocking the Main Thread. Refactor this to run on a background `Task`. If it is currently synchronous, change it to `async` or use `Task.detached`. Ensure the final result is assigned to the `@Published` property on the `MainActor`."*
-3. **Review:** Check that the AI actually detached the work, rather than just wrapping it in a `Task` that inherits the `MainActor` context.
+3. **Review:** Check that the AI actually detached the work, rather than just wrapping it in a `Task` that inherits the `MainActor` context. (Full render-path sweep: `prompts/performance/main-thread-audit.md`.)
 
 ---
 
@@ -52,7 +52,7 @@ SwiftUI compares the old View graph to the new View graph to decide what to redr
 ### The Fix Workflow
 1. **Detection:** You notice the entire `FeedView` is re-rendering every time the user types a character in the search bar.
 2. **Prompt:** *"This SwiftUI `FeedView` is over-rendering. The `searchText` property is causing the entire scroll view to redraw. Extract the SearchBar into its own dedicated `View` struct and pass a `@Binding`, isolating the state updates."*
-3. **Review:** Ensure the AI correctly extracted the view and didn't just wrap the text field in an `HStack`.
+3. **Review:** Ensure the AI correctly extracted the view and didn't just wrap the text field in an `HStack`. (Read-map audit: `prompts/performance/render-isolation-audit.md`.)
 
 ---
 
@@ -68,7 +68,7 @@ When a user navigates away from a screen, any ongoing network requests or backgr
 ### The Fix Workflow
 1. **Detection:** You notice tasks are outliving their parent views.
 2. **Prompt:** *"This `async` network call inside the `onAppear` modifier is not being canceled when the view disappears. Refactor this to use the `.task { }` modifier, which automatically handles cancellation, or manually store the `Task` and cancel it in `onDisappear`."*
-3. **Review:** Confirm the AI handles `CancellationError` correctly inside the `catch` block so it doesn't log false errors.
+3. **Review:** Confirm the AI handles `CancellationError` correctly inside the `catch` block so it doesn't log false errors. (Lifecycle sweep: `prompts/review/ios-lifecycle-audit.md`.)
 
 ---
 
@@ -128,7 +128,7 @@ Two distinct crimes, one line of code: blocking I/O in a view body, and decode-a
 
 > *"Time Profiler on device shows `LibraryCard.body` blocking the main thread in `Data(contentsOf:)` (~180ms per new card) and decoding 1500×1500 JPEGs for 160pt cells. Fix exactly this, in a new `ArtworkLoader`: (1) fetch bytes with `URLSession.data(from:)` — async, never `Data(contentsOf:)`; (2) downsample during decode to the target pixel size with `CGImageSourceCreateThumbnailAtIndex` (`kCGImageSourceCreateThumbnailFromImageAlways`, `kCGImageSourceThumbnailMaxPixelSize` = 160 × screen scale), off the main actor; (3) cache decoded images in an `NSCache` keyed by URL with `totalCostLimit` set in bytes; (4) the card uses `.task(id: track.coverURL)` so loads cancel when cells are reused. Do not touch the ViewModel or repository. List what you did NOT fix."*
 
-Every clause traces back to a profiler fact. The AI's job is transcription into correct code, not diagnosis.
+Every clause traces back to a profiler fact. The AI's job is transcription into correct code, not diagnosis. (This prompt, generalized: `prompts/performance/image-pipeline-fix.md`, backed by `adrs/009-image-pipeline.md`.)
 
 ### The Fix (Shape of the Result)
 

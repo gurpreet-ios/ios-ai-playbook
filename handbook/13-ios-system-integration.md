@@ -155,6 +155,8 @@ public struct NowPlayingAttributes: ActivityAttributes {
 
 > *"Add a Now Playing widget to MusicApp. CRITICAL — the widget is a separate PROCESS: (1) it must not reference `PlayerViewModel`, `AudioEngine`, or any live app object; (2) all shared data flows through a `Codable` snapshot struct in the App Group container `group.com.example.musicapp` — define the struct first; (3) the app writes the snapshot and calls `WidgetCenter.reloadTimelines` at every playback transition; the widget only reads; (4) a missing/undecodable snapshot renders a designed 'Nothing Playing' state, never a crash or a stale entry. List every assumption you're making about data freshness."*
 
+(Generalized: `prompts/architecture/widget-app-group.md`.)
+
 ---
 
 By mastering these system integrations, you elevate your app from a basic utility to a first-class citizen in the Apple ecosystem. The prompts in this chapter are the pattern: name the process boundary explicitly, and the AI stops generating code that only works inside a single target.

@@ -44,6 +44,8 @@ Configuration discipline the AI won't apply unless told: record snapshots for a 
 
 > *"Add snapshot tests for `NowPlayingView` in states: no track, playing, paused. Record on iPhone 16 / light + dark / `.extraExtraLarge` Dynamic Type. Pin the locale. If a snapshot fails on an intentional change, the diff image goes in the PR description."*
 
+(Generalized: `prompts/testing/snapshot-suite.md`.)
+
 ## Gate 4: Flows and the Accessibility Audit
 
 Unit and snapshot layers can all pass while the app's *flows* are broken (a navigation destination never wired, a button disabled by a stale condition). A thin XCUITest layer — launch, tap through each top-level flow, assert the destination renders real data — catches integration failures cheaply. Keep it thin: UI tests are the most expensive gate to maintain, so they verify *reachability*, not business logic.

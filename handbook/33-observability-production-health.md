@@ -60,7 +60,7 @@ Here the direction reverses: instead of instrumenting code the AI wrote, you're 
 
 > *"Here is a symbolicated crash log and the MetricKit diagnostic from the same session. (1) Classify the termination: exception, jetsam, or watchdog — cite the fields that decide it. (2) Given the top 10 frames, state your best hypothesis and your confidence. (3) List what evidence would change your mind. Do NOT propose a code fix yet."*
 
-The staged prompt matters: classification before hypothesis, hypothesis before fix, and an explicit invitation to express uncertainty — the anti-sycophancy hook from the debugging playbooks, because a model that commits early to your framing will defend it against the evidence.
+The staged prompt matters: classification before hypothesis, hypothesis before fix, and an explicit invitation to express uncertainty — the anti-sycophancy hook from the debugging playbooks, because a model that commits early to your framing will defend it against the evidence. (Standing version: `prompts/debugging/crash-triage.md`.)
 
 Two force multipliers:
 
@@ -73,7 +73,7 @@ One more standing audit for the Chapter 14 rotation — because agents ship feat
 
 > *"Review this PR for production observability: (1) if this feature fails in the field, what log line or metric tells us — name it, or flag the gap; (2) any new failure path that swallows errors (`try?`, empty catch) without telemetry; (3) any logging of user content or identifiers that violates the privacy rules; (4) long-running operations lacking signpost intervals. For each gap, propose the minimal instrumentation — not a logging framework."*
 
-"If this fails, how do we know?" is the review question that costs one sentence in a PR and saves a week of blind debugging six months later.
+"If this fails, how do we know?" is the review question that costs one sentence in a PR and saves a week of blind debugging six months later. (Standing version: `prompts/review/observability-review.md`.)
 
 ## 6. The Loop, Closed
 

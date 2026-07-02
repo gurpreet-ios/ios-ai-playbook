@@ -13,7 +13,7 @@ This is not a book about "vibe coding." It is a working resource for operating l
 | Section | Contents |
 | :-- | :-- |
 | [`handbook/`](handbook/) | The 37-chapter handbook (below) + the dated [Model Landscape appendix](handbook/appendix-model-landscape.md) |
-| [`prompts/`](prompts/README.md) | A starter library of production prompt systems — architecture, review, testing, performance |
+| [`prompts/`](prompts/README.md) | 41 production prompt systems, chapter-mapped — architecture, review, performance, debugging, testing, security, release |
 | [`adrs/`](adrs/README.md) | 13 Architecture Decision Records, each usable as an AI context anchor |
 | [`architecture-breakdowns/`](architecture-breakdowns/README.md) | Seed blueprints for deconstructing real products (Uber, Spotify, Instagram) with prompt sequences |
 | [`interview-playbooks/`](interview-playbooks/README.md) | Structured mock interviews (machine coding, architecture, code review) |

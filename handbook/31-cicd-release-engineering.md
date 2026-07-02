@@ -63,10 +63,12 @@ The AI-era point: agents make it cheap to build flag plumbing, kill switches, an
 
 > *"Add a remote feature-flag layer: a `FeatureFlags` service fetched at launch with a 24h cache and hardcoded defaults for offline-first startup. Every flag is an enum case with a default. Generate the kill-switch flag for `SyncEngine` — when off, the app uses `LegacySyncEngine` — and a Swift Testing suite proving both paths construct."*
 
+(Generalized: `prompts/release/feature-flag-scaffold.md`.)
+
 ## 6. The Release Checklist as a Prompt System
 
 The pre-submission checklist is a living document the agent runs, not a wiki page humans forget (Chapter 22's philosophy):
 
 > *"Run the release audit for build 342: (1) confirm version/build monotonicity against App Store Connect; (2) diff the privacy manifest against new API usage in this release's merged PRs; (3) verify all feature flags added this cycle default off and list them with owners; (4) check the crash-free rate and hitch p95 of the current external-ring build against the last release's soak numbers; (5) draft release notes from the merged PR titles, humanized. Output a go/no-go table with evidence per row."*
 
-Every row is mechanical; the *go/no-go call* is yours. That division — machine assembles the evidence, human owns the irreversible action — is this chapter's entire thesis, and it is the same division you'll see again at the agent-security boundary in Chapter 35.
+Every row is mechanical; the *go/no-go call* is yours. That division — machine assembles the evidence, human owns the irreversible action — is this chapter's entire thesis, and it is the same division you'll see again at the agent-security boundary in Chapter 35. (The checklist ships as `prompts/release/release-audit.md`.)

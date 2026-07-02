@@ -26,7 +26,7 @@ The Keychain's C API is exactly the boilerplate AI should write — but specify 
 
 > *"Generate a `KeychainStore` (protocol + implementation) for auth tokens: `kSecClassGenericPassword`, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (background refresh must work, but no iCloud/backup migration), throwing typed errors on OSStatus failures. No caching layer in front — reads go to the Keychain every time. Swift Testing suite included."*
 
-The attribute is the review point: `WhenUnlocked` breaks background sessions, anything without `ThisDeviceOnly` migrates to new devices via backup, and the AI left to default will choose whatever its training data used most.
+The attribute is the review point: `WhenUnlocked` breaks background sessions, anything without `ThisDeviceOnly` migrates to new devices via backup, and the AI left to default will choose whatever its training data used most. (Generalized: `prompts/security/keychain-store.md`.)
 
 ### Transport
 

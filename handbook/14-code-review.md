@@ -59,6 +59,8 @@ AI is hesitant to delete code unless explicitly told to. During iterative genera
 Use an LLM to review the LLM.
 > *"Act as a merciless code reviewer. Analyze this file and highlight any variables, states, or functions that are completely unused or redundant."*
 
+(Full residue sweep: `prompts/review/dead-code-audit.md`.)
+
 ### 5. The "Happy Path" Bias
 
 AI writes the perfect code for the perfect scenario. It rarely considers what happens when the user goes into a tunnel on a 3G connection while the database is locked.
@@ -200,3 +202,5 @@ Fixing this by hand makes you the AI's junior. The review comment goes back into
 > *"This PR violates our ADRs. Re-read `adrs/001-swiftdata-over-coredata.md`, `adrs/002-observation-over-combine.md`, and `adrs/004-state-management.md`, then rewrite: (1) delete `RecentlyPlayedManager` entirely; (2) add `lastPlayedAt: Date?` to the `Track` @Model; (3) `TrackRepository` gains `markPlayed(id:)` that stamps it and saves; (4) `PlayerViewModel.play` calls the repository it already owns — no singletons; (5) `LibraryView` gets recents from `LibraryViewModel`, backed by a `FetchDescriptor` sorted by `lastPlayedAt` — no fetches in view bodies. Keep the diff under 60 lines."*
 
 The rewrite came back at 41 lines, four files, zero new types — deletion as a review outcome. The measure of AI-era review is not "did we find the bugs" but "did the codebase's rules, written down where the AI must read them, make the second attempt smaller than the first."
+
+This whole review is a repeatable system: `prompts/review/adr-drift-audit.md` runs the ADR diff, and `prompts/documentation/pr-description-generator.md` writes the PR body both humans and review agents read first.

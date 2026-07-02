@@ -125,6 +125,8 @@ MusicApp ships as a single SwiftPM target today — fine for a codebase you can 
 
 > *"Split MusicApp into SwiftPM targets. Layers: models, networking, persistence, audio, and the app layer (ViewModels + Views). Update `Package.swift`; each target gets its own `Sources/<TargetName>` directory. Keep everything compiling."*
 
+(The cycle-proof version of this ask is `prompts/architecture/swiftpm-modularization.md`, backed by `adrs/006-modularization-strategy.md`.)
+
 ### The Failure: The Cycle
 
 The AI's first `Package.swift` looked plausible:
