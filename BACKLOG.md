@@ -35,7 +35,7 @@ _Last updated: 2026-07-02._
 | 3 | New chapters: Verification, CI/CD & Release, Security & Privacy, On-Device AI, Observability, Agentic Security & Cost | 2 | P1 | Large |
 | 4 | Deepen weakest chapters (Testing, A11y, Cheat Sheets, Breakdowns) | 2 | P1 | Med |
 | 5 | ADR library 5 → ~12 | 3 | P2 | Med |
-| 6 | Interview playbooks 3 → ~12 with full scripts | 3 | P2 | Med |
+| 6 | ✅ ~~Interview playbooks 3 → ~12 with full scripts~~ (done 2026-07-02: 14 playbooks across 4 categories incl. new `debugging/`; 7-part format with Driving the LLM; Ch 18 + README aligned) | 3 | P2 | Med |
 | 7 | Prompt library 18 → 40–60, chapter-mapped | 3 | P2 | Med |
 | 8 | Sample apps: tests, compile CI, fill empty `Components/` | 3 | P2 | Small–Med |
 | 9 | Site CI (build + link check, port from Backend Edition) | 4 | P2 | Small |
