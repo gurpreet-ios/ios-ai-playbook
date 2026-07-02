@@ -71,3 +71,87 @@ AI models often default to jarring, linear animations or forget them entirely. Y
 When auditing AI-generated animations, watch for:
 1. Animating the wrong state properties (causing the whole screen to redraw).
 2. Forgetting to use `.transaction { $0.animation = nil }` when you explicitly *want* an instant update.
+
+---
+
+## 5. The Running Example: Building MusicApp's Now Playing Screen
+
+> *Continuing the Part 3 spine ([`sample-apps/music-interview-app`](../sample-apps/music-interview-app)). Chapter 9 gave us `PlayerViewModel`; this chapter puts a screen on it — and catches the AI's favorite rendering mistake.*
+
+### The Build
+
+The screen is `Sources/Views/NowPlayingView.swift`: album art, title/artist, transport controls. The prompt that produced its skeleton leaned on the chapter's rules — declarative structure, injected state, no internal `@State` for anything that isn't ephemeral:
+
+> *"Build `NowPlayingView` in SwiftUI. It takes a `PlayerViewModel` (an `@Observable` `@MainActor` class — do not wrap it in `@ObservedObject`, plain `var` is correct for iOS 17 Observation). Layout: square album art, track title + artist, previous/play-pause/next controls. Controls are disabled when `currentTrack == nil`. Every control gets an `accessibilityLabel`. Actions call the ViewModel's async methods inside `Task { }` — the view contains zero playback logic."*
+
+The interesting part of the result is what it *doesn't* contain:
+
+```swift
+public struct NowPlayingView: View {
+    var viewModel: PlayerViewModel     // plain var — Observation tracks reads
+
+    public var body: some View {
+        VStack(spacing: 40) {
+            // …album art…
+            Text(viewModel.currentTrack?.title ?? "Not Playing")
+            // …
+            Button {
+                Task { await viewModel.togglePlayPause() }
+            } label: {
+                Image(systemName: viewModel.isPlaying
+                    ? "pause.circle.fill" : "play.circle.fill")
+            }
+            .disabled(viewModel.currentTrack == nil)
+        }
+    }
+}
+```
+
+No `@ObservedObject`, no `objectWillChange`, no closure callbacks. With the `@Observable` macro, SwiftUI records exactly which properties this `body` reads (`currentTrack`, `isPlaying`) and re-evaluates only when *those* change. `LibraryView` holds a different ViewModel and never reads playback state — so a play/pause toggle re-renders the player screen and nothing else. That is Observation-scoped state working as designed, and it's free *as long as you keep reads scoped*.
+
+### The Failure: The 4Hz Screen
+
+Then the obvious next feature: a progress bar. The AI's instinct is to put time on the ViewModel — publish `currentTime` from the audio engine a few times a second:
+
+```swift
+// In PlayerViewModel — the AI's first draft
+public var currentTime: TimeInterval = 0   // updated 4×/sec from the engine
+```
+
+```swift
+// In NowPlayingView.body
+ProgressView(value: viewModel.currentTime,
+             total: viewModel.currentTrack?.duration ?? 1)
+Text(timeString(viewModel.currentTime))
+```
+
+It works. It also makes the **entire screen body re-evaluate four times per second** — Observation is property-scoped, but the *view* reading the property is the whole screen, so the album art, the shadow, the title stack, and three buttons all get rebuilt and re-diffed at 4Hz, forever, while the phone is warm in someone's pocket. Nothing is visibly wrong, which is exactly why AI-generated over-rendering survives review: the diff looks correct and the damage only shows in Instruments.
+
+Confirm it in ten seconds — drop this in the body and watch the console tick:
+
+```swift
+let _ = Self._printChanges()   // logs every body re-evaluation and why
+```
+
+### The Fix: Shrink the View That Reads the Hot Property
+
+The rule from the animation section applies to *all* state, not just animated state: **high-frequency state may only be read by the smallest view that can render it.**
+
+```swift
+struct PlaybackProgressBar: View {
+    var viewModel: PlayerViewModel   // same object — different read scope
+
+    var body: some View {
+        ProgressView(value: viewModel.currentTime,
+                     total: viewModel.currentTrack?.duration ?? 1)
+    }
+}
+```
+
+`NowPlayingView` embeds `PlaybackProgressBar()` but never reads `currentTime` itself — so the 4Hz tick now invalidates a one-line subview and nothing else. Same object, same data flow; the only thing that moved is *where the read happens*. (For pure time display there's a zero-state option too: `Text(timerInterval:)` and `TimelineView` let the framework tick the label without any body re-evaluation — reach for them when the requirement is cosmetic time, not real engine position.)
+
+### The Prompt That Prevents It
+
+> *"Add a playback progress bar to `NowPlayingView`. Constraint: `currentTime` updates several times per second, so it must be read ONLY inside a new, minimal subview — `NowPlayingView.body` must not reference it directly. After generating, list every view whose body reads `currentTime` and justify each. Add a DEBUG `Self._printChanges()` to `NowPlayingView` and confirm it does not log during steady playback."*
+
+The verification clause is the senior move: "only the progress bar re-renders" is a checkable claim, so the prompt makes the AI check it.

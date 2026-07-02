@@ -82,3 +82,77 @@ If you *must* have the AI write a macro:
 * **Senior Prompt:** "Write a Swift Macro called `@RouteBuilder`. Attached is `SwiftSyntax` documentation for generating enum cases. Think step-by-step about the AST nodes required to generate a switch statement."
 
 *(Note: Unless you are building platform-level tooling, avoid asking AI to write macros. Ask it to use them instead).*
+
+---
+
+## 6. The Running Example: MusicApp's Offline Download Engine
+
+> *Continuing the Part 3 spine ([`sample-apps/music-interview-app`](../sample-apps/music-interview-app)). This chapter is where the architecture meets the compiler: the offline-downloads feature, and a data race Swift 6 refuses to build.*
+
+### The Task
+
+"Downloaded tracks play offline." That one sentence is a sync engine: fetch metadata from the network, persist it in SwiftData, download the audio file, record its local URL on the persisted row, and prefer that URL at playback time. It crosses every boundary this chapter covers — network, disk, model, UI — which is why it's also where AI-generated concurrency goes to die.
+
+### The Working Architecture
+
+MusicApp splits the engine across three isolation domains, each chosen deliberately:
+
+- **`NetworkClient` is an `actor`** — it owns mutable session state and does slow work; nothing else should wait on it.
+- **`TrackRepository` is `@MainActor`** — it mutates SwiftData `@Model` objects, and this app confines all model mutation to the main actor's `ModelContext`.
+- **`Track` is a SwiftData `@Model` class** — reference-typed, mutable, and *not* naturally `Sendable`.
+
+```swift
+@MainActor
+public final class TrackRepository: TrackRepositoryProtocol {
+    private let networkClient: any NetworkClientProtocol   // an actor
+    private let modelContext: ModelContext
+
+    public func downloadTrack(id: UUID) async throws {
+        let track = try await getTrack(id: id)          // main actor: fetch/upsert the row
+        let fileURL = try await networkClient
+            .downloadTrackFile(id: id)                  // hops to the actor: slow I/O off main
+        track.offlineFileURL = fileURL                  // back on main: mutate the model
+        try modelContext.save()
+    }
+}
+```
+
+Note the shape: the *slow thing* (`downloadTrackFile`) happens inside the network actor and returns a `Sendable` value (`URL`). The *mutable thing* (`track`) never leaves the main actor. Values cross the boundary; models don't.
+
+### The Failure: The Race Swift 6 Caught
+
+The AI's first draft "optimized" the repository by pushing the whole operation into a background task — a pattern it has seen ten thousand times in pre-Swift-6 training data:
+
+```swift
+// ❌ The AI's "faster" version
+public func downloadTrack(id: UUID) async throws {
+    let track = try await getTrack(id: id)
+    Task.detached {                                   // escape the main actor…
+        let fileURL = try await self.networkClient.downloadTrackFile(id: id)
+        track.offlineFileURL = fileURL                // …and mutate the @Model from nowhere
+        try self.modelContext.save()
+    }
+}
+```
+
+Under Swift 5 this compiles, ships, and corrupts state intermittently: a background thread mutates a model object the UI is simultaneously reading, and `ModelContext` (non-`Sendable`, main-actor-bound here) gets touched off its actor. Under Swift 6 strict concurrency it simply does not build:
+
+```text
+error: capture of 'track' with non-Sendable type 'Track' in a '@Sendable' closure
+error: main actor-isolated property 'modelContext' can not be referenced
+       from a Sendable closure
+```
+
+Read those diagnostics as the compiler telling you *the design is wrong*, not that annotations are missing. The classic AI failure loop starts here: it will offer to "fix" the error by slapping `@unchecked Sendable` on `Track` — which deletes the diagnostic while keeping the race. (MusicApp's `Track` does carry an `@unchecked Sendable` conformance to satisfy protocol requirements; it is safe *only because* every mutation site is `@MainActor`-confined. Treat any AI-added `@unchecked Sendable` as a review-blocking waiver, per the data-race playbook in `interview-playbooks/code-review/data-race.md`.)
+
+The correct fix is the working version above: keep the mutation on the main actor and move only the *waiting* off it. The download already ran on the network actor; detaching the model write bought nothing but the race.
+
+### Why Not a `ModelActor`?
+
+For heavier sync loads (hundreds of rows, import jobs), the right tool is SwiftData's `@ModelActor` — a dedicated actor with its own `ModelContext` doing bulk writes off the main thread, coordinating with the UI via saves and re-fetches rather than shared objects. MusicApp doesn't need it: its writes are a handful of rows on user action, and the main-actor context is nowhere near contended. That's an ADR-worthy judgment call — *default to main-actor confinement, escalate to `@ModelActor` when profiling says the main thread pays for writes* — and it belongs in your rules file so the AI stops guessing which world it's in.
+
+### The Prompt That Prevents It
+
+> *"Implement `downloadTrack(id:)` in `TrackRepository` (`@MainActor`, Swift 6 strict concurrency). Rules: (1) file I/O and networking run inside `NetworkClient` (an actor) and return `Sendable` values only; (2) `Track` is a SwiftData `@Model` — it must never be captured by a detached task or sent across an isolation boundary; (3) all `ModelContext` access stays on the main actor; (4) if the compiler reports a Sendable violation, treat it as a design error — do NOT add `@unchecked Sendable` or `nonisolated(unsafe)` anywhere. Build with strict concurrency before presenting the diff."*
+
+The compiler is the one reviewer that never gets tired. Swift 6's strictness turns an entire class of AI-generated production crashes into build failures — your job in the prompt is to forbid the escape hatches that would turn them back.

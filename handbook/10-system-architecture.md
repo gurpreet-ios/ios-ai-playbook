@@ -112,3 +112,75 @@ For Senior/Staff roles, you must be familiar with backend-derived patterns, even
 
 ### AI Prompts for Advanced Systems
 - **Scaffolding:** *"Generate a CQRS architecture for the `OrderService`. Define the `Command` models for creating orders, and the `Query` models for fetching order history."*
+
+---
+
+## 6. The Running Example: Modularizing MusicApp
+
+> *Continuing the Part 3 spine ([`sample-apps/music-interview-app`](../sample-apps/music-interview-app)). Chapter 9 chose MVVM + Router; this chapter draws the module boundaries beneath it.*
+
+MusicApp ships as a single SwiftPM target today — fine for a codebase you can read in one sitting. But its folder layout (`Models/`, `Services/`, `Repositories/`, `ViewModels/`, `Views/`) is already the module map waiting to happen, and doing the split on a small app is the cheapest way to learn where the AI gets it wrong.
+
+### The Ask
+
+> *"Split MusicApp into SwiftPM targets. Layers: models, networking, persistence, audio, and the app layer (ViewModels + Views). Update `Package.swift`; each target gets its own `Sources/<TargetName>` directory. Keep everything compiling."*
+
+### The Failure: The Cycle
+
+The AI's first `Package.swift` looked plausible:
+
+```swift
+targets: [
+    .target(name: "MusicModels"),
+    .target(name: "MusicNetworking", dependencies: ["MusicModels", "MusicPersistence"]),
+    .target(name: "MusicPersistence", dependencies: ["MusicModels", "MusicNetworking"]),
+    // …
+]
+```
+
+Its reasoning was locally sensible — the networking layer "needs to cache responses" (so it imports persistence), and the persistence layer "needs to fetch what's missing" (so it imports networking). Two locally-sensible decisions, one globally illegal graph. SwiftPM refuses at resolution time:
+
+```text
+error: cyclic dependency declaration found:
+MusicNetworking -> MusicPersistence -> MusicNetworking
+```
+
+You will meet this failure constantly, because **an AI generating file-by-file optimizes each file's convenience, and cycles are precisely what convenient local decisions sum to.** In a monolith the same cycle forms silently as tangled imports; SwiftPM's refusal to build is the feature you are buying.
+
+### The Fix: Point Dependencies at the Contract
+
+The cycle exists because two peers each want the other's *implementation*. The repair is the Dependency Rule from Clean Architecture, applied with SwiftPM as the enforcement mechanism: peers may only share what sits **below** them.
+
+```swift
+targets: [
+    // Leaf: pure value types (TrackDTO, PlaybackState). No dependencies.
+    .target(name: "MusicModels"),
+
+    // Peers: know the models, not each other.
+    .target(name: "MusicNetworking",  dependencies: ["MusicModels"]),
+    .target(name: "MusicPersistence", dependencies: ["MusicModels"]),
+    .target(name: "MusicAudio",       dependencies: ["MusicModels"]),
+
+    // Composition: repositories + ViewModels + Views orchestrate the peers.
+    .target(name: "MusicApp",
+            dependencies: ["MusicModels", "MusicNetworking",
+                           "MusicPersistence", "MusicAudio"]),
+]
+```
+
+"Networking caches" and "persistence fetches" were never one layer's job — they are *orchestration*, and MusicApp already has the right home for it: `TrackRepository`. It takes both a `NetworkClientProtocol` and a `ModelContext`, fetches DTOs from one, upserts `@Model` rows into the other, and neither lower layer knows the other exists. The Repository pattern from §3 of this chapter isn't just an abstraction nicety — it is *where the cycle goes to die*.
+
+Two boundary rules fall out of the split, and both should appear verbatim in your prompts:
+
+1. **DTOs stay in the leaf; `@Model` classes stay in persistence.** `TrackDTO` (a `Sendable` struct) can be passed anywhere; `Track` (a SwiftData `@Model`) is persistence machinery. If a "models" module imports SwiftData, every consumer inherits that import.
+2. **Peers export protocols, the composition layer owns the concrete graph.** `NetworkClientProtocol` and `AudioEngineProtocol` are the public API; the composition root (Chapter 9) is the only place concrete types meet.
+
+### The Payoff for AI Work
+
+Modularization is usually sold on build times. For AI-assisted development the bigger payoff is **context bounding**: "fix the retry logic in `MusicNetworking`" now ships the AI a target with three files and one protocol surface, not the whole app. The module boundary *is* the context window boundary — and access control (`internal` by default, `public` on the contract) means the AI physically cannot generate a call to something it shouldn't touch, because the compiler will reject it.
+
+### The Prompt That Prevents the Cycle
+
+> *"Split this app into SwiftPM targets. Draw the dependency graph BEFORE writing `Package.swift`, as a list of `target → dependencies`. Rules: (1) value types in a leaf `Models` target with zero dependencies; (2) networking, persistence, and audio are peers that depend only on `Models` — never on each other; (3) any logic needing two peers lives in a repository in the app layer; (4) mark everything `internal` except the protocol each target exports. If you find yourself wanting a peer-to-peer import, stop and tell me instead."*
+
+The last sentence matters: it converts the AI's silent workaround (a cycle, a re-declared type, a copy-pasted DTO) into a surfaced design question — which is exactly what a senior engineer on your team would do.

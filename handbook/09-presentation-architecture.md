@@ -110,4 +110,125 @@ Derived from React, Redux (and its Swift equivalent, TCA) relies on a single glo
 
 ---
 
+## 5. The Running Example: Choosing an Architecture for MusicApp
+
+> **The spine of Part 3.** Chapters 9–16 evolve one codebase: **MusicApp**, the streaming-app skeleton in [`sample-apps/music-interview-app`](../sample-apps/music-interview-app). Every decision in these chapters is made on it, and every failure mode shown is one an AI actually produces. By Chapter 16 you will have seen the same app architected, modularized, built, made concurrent, reviewed, profiled, and debugged.
+
+### The Decision
+
+MusicApp is a streaming client: a library list, a Now Playing screen, offline downloads. Small team, SwiftUI-first, iOS 17+. Working down this chapter's catalog:
+
+- **VIPER** is out immediately — this is SwiftUI, and five protocols per screen for a two-tab app is self-harm.
+- **TCA** is defensible but unpaid-for: there is no complex shared-state graph, no undo/replay requirement, and the team would be debugging the framework *and* the AI's stale TCA training data at the same time.
+- **MVI** would help the player's state machine but taxes every boring screen with intent plumbing.
+- **MVVM + Router** wins: native fit with `@Observable`, testable seams via protocol-injected dependencies, and boilerplate so conventional the AI cannot get creative with it.
+
+The decision is recorded in an ADR (`adrs/004-state-management.md` establishes the state rules; the scaffold prompt in `prompts/architecture/mvvm-scaffold.md` enforces them) so no future prompt can relitigate it.
+
+### The Trap: The First Generation
+
+The lazy prompt — *"Build a music streaming app in SwiftUI with a library screen and a player screen. Use MVVM."* — produces MVVM in name only. The model reads "an app" and generates **one** ViewModel:
+
+```swift
+@MainActor @Observable
+final class MusicAppViewModel {          // ← "the" ViewModel
+    // Library state
+    var tracks: [Track] = []
+    var isLoadingLibrary = false
+    // Playback state
+    var playbackState: PlaybackState = .stopped
+    var currentTrack: Track?
+    // Download state
+    var downloadProgress: [UUID: Double] = [:]
+    // Navigation state
+    var isShowingPlayerSheet = false
+    // Whose error is this? Nobody knows.
+    var errorMessage: String?
+
+    func loadTracks() async { /* … */ }
+    func play(track: Track) async { /* … */ }
+    func togglePlayPause() async { /* … */ }
+    func download(track: Track) async { /* … */ }
+    // …400 lines by the third feature
+}
+```
+
+This is the **Massive-ViewModel trap**, and it costs you three ways:
+
+1. **Render blast radius.** Every view reads this object. (With `ObservableObject` this is catastrophic — any change invalidates every observer. `@Observable`'s property-level tracking softens it, but coarse state like a shared `errorMessage` still couples unrelated screens.)
+2. **Test surface.** Testing "does the library load?" requires constructing playback, download, and navigation dependencies too.
+3. **The context magnet** — the AI-era cost. Every future prompt about *any* feature must drag this entire file into context. Every generated diff touches the same file. The god object doesn't just rot your architecture; it rots your prompts.
+
+### The Fix: Scope State by Lifetime
+
+The split rule that MusicApp uses — and the one to dictate in your prompts — is **scope state by lifetime, not by screen count**:
+
+- Library state is *screen-scoped*: it can die when the screen does. → `LibraryViewModel`.
+- Playback state is *app-scoped*: the music keeps playing while you browse. → `PlayerViewModel`, created once at the composition root and injected wherever it's needed.
+
+```swift
+@MainActor @Observable
+public final class LibraryViewModel {
+    public var tracks: [Track] = []
+    public var isLoading: Bool = false
+    public var errorMessage: String?
+
+    private let repository: any TrackRepositoryProtocol
+
+    public init(repository: any TrackRepositoryProtocol) {
+        self.repository = repository
+    }
+
+    public func loadTracks() async { /* delegate to repository */ }
+}
+
+@MainActor @Observable
+public final class PlayerViewModel {
+    public var playbackState: PlaybackState = .stopped
+    public private(set) var currentTrack: Track?
+
+    public var isPlaying: Bool { playbackState == .playing }
+
+    private var queue: [Track] = []
+    private let audioEngine: any AudioEngineProtocol
+
+    public init(audioEngine: any AudioEngineProtocol) { /* … */ }
+
+    public func play(track: Track, in queue: [Track] = []) async { /* … */ }
+    public func togglePlayPause() async { /* … */ }
+}
+```
+
+Both are constructed in one place — the **composition root** (`AppRootView` in `Sources/App/MusicInterviewApp.swift`), which builds the dependency graph and hands each screen exactly the object matching its lifetime. Chapter 12 returns to why that file is also where concurrency correctness is won or lost.
+
+### The Router
+
+MusicApp today is a two-tab `TabView`, so its routing is trivial. But the moment a third screen appears (playlist detail, artist page), navigation must not be scattered as inline `NavigationLink` destinations — that is how the AI welds screens together. The pattern the next feature drops into:
+
+```swift
+enum Route: Hashable {
+    case playlistDetail(Playlist.ID)
+    case artist(String)
+}
+
+@MainActor @Observable
+final class Router {
+    var path = NavigationPath()
+    func navigate(to route: Route) { path.append(route) }
+    func popToRoot() { path = NavigationPath() }
+}
+```
+
+Views call `router.navigate(to:)` and stay ignorant of destinations; one `.navigationDestination(for: Route.self)` at the stack root maps routes to screens.
+
+### The Prompt That Prevents the Trap
+
+The difference between the god object and the clean split is one paragraph of constraints:
+
+> *"Add a [feature] screen to MusicApp. Architecture rules: (1) One `@Observable @MainActor` ViewModel per screen — do NOT add state to any existing ViewModel. (2) Playback state lives only in `PlayerViewModel`; if you need it, inject `PlayerViewModel`, never duplicate its properties. (3) All dependencies injected via initializer as protocols. (4) Navigation goes through `Router.navigate(to:)` — no inline `NavigationLink(destination:)`. Review `adrs/004-state-management.md` before writing code."*
+
+The catalog above tells you what the patterns are. The lesson of MusicApp is that *the pattern is not the deliverable — the boundary is.* MVVM without an ownership rule degenerates into a god object within three prompts.
+
+---
+
 *In the next chapter, we will move beneath the UI layer and explore **System Architectures** like Clean, DDD, and Repository patterns.*
