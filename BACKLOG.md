@@ -34,7 +34,7 @@ _Last updated: 2026-07-02._
 | 2 | ✅ ~~Running-example spine through Ch 9–16~~ (done 2026-07-02: every chapter has a Running Example section on music-interview-app with a real failure mode; Ch 16 uses the app's actual composition-root crash; new graph-constructing regression test passes on simulator) | 2 | P1 | Large |
 | 3 | ✅ ~~New chapters: Verification, CI/CD & Release, Security & Privacy, On-Device AI, Observability, Agentic Security & Cost~~ (done 2026-07-02: Ch 30–35 written + wired into README as Parts XII–XIII; prompts/security/ recreated; bonus Ch 19b (agent rules) + templates/agent-rules/ landed alongside) | 2 | P1 | Large |
 | 4 | ✅ ~~Deepen weakest chapters (Testing, A11y, Cheat Sheets, Breakdowns)~~ (done 2026-07-02: Ch 26 full rewrite w/ tautology audit + new prompt file; Ch 25 end-to-end workflow w/ before/after; Ch 24 three reference tables; 3 breakdowns → full blueprints + README index) | 2 | P1 | Med |
-| 5 | ADR library 5 → ~12 | 3 | P2 | Med |
+| 5 | ✅ ~~ADR library 5 → ~12~~ (done 2026-07-02: ADRs 006–013 added — modularization, router, networking, image pipeline, DI, testing, deployment target, strict concurrency — all with AI Anchor Usage; README index updated) | 3 | P2 | Med |
 | 6 | ✅ ~~Interview playbooks 3 → ~12 with full scripts~~ (done 2026-07-02: 14 playbooks across 4 categories incl. new `debugging/`; 7-part format with Driving the LLM; Ch 18 + README aligned) | 3 | P2 | Med |
 | 7 | Prompt library 18 → 40–60, chapter-mapped | 3 | P2 | Med |
 | 8 | Sample apps: tests, compile CI, fill empty `Components/` | 3 | P2 | Small–Med |

@@ -14,6 +14,14 @@ ADRs here serve a double purpose:
 | [003](003-reactive-frameworks.md) | Structured concurrency over reactive frameworks | any asynchronous code |
 | [004](004-state-management.md) | State ownership hierarchy | scaffolding features; reviewing drift |
 | [005](005-mcp-tools.md) | MCP for local tools | wiring agents to internal docs/tools |
+| [006](006-modularization-strategy.md) | SwiftPM layer-then-feature modularization | creating targets; editing `Package.swift` |
+| [007](007-navigation-router.md) | Router-owned navigation | any screen that navigates; `NavigationLink` in a diff |
+| [008](008-networking-stack.md) | URLSession actor + repositories, no frameworks | anything that touches the network |
+| [009](009-image-pipeline.md) | Downsampling pipeline, bounded caches | any view showing remote images |
+| [010](010-dependency-injection.md) | Initializer injection from a composition root | scaffolding features; any `.shared` in a diff |
+| [011](011-testing-strategy.md) | Swift Testing + the deletion standard | generating or reviewing tests |
+| [012](012-deployment-target.md) | Target = N−1, September review | any platform-API generation |
+| [013](013-strict-concurrency.md) | Strict concurrency; escape hatches are waivers | concurrent code; any Sendable diagnostic |
 
 ## Writing a new ADR
 
