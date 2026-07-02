@@ -18,14 +18,24 @@ The interviewer is testing your knowledge of Swift Concurrency, specifically `ac
 > 
 > When a new request comes in, the actor filters out any timestamps older than 1 second from the array. If the remaining array count is less than 5, I append the current timestamp and return `true` (allow). If it's 5 or more, I return `false` (block)."*
 
-## 5. The Follow-Up
-**Interviewer:** "The sliding window log works, but storing thousands of timestamps could be a memory issue if the limit was 10,000 requests per minute instead of 5 per second. How would you optimize the memory?"
+## 5. Driving the LLM
 
-## 6. The Ideal Discussion
-> *"You're right. To optimize memory for high volumes, I would switch to the Token Bucket algorithm. 
+The prompt sequence for this question in a live vibe-coding session:
+
+> **Plan:** "We need a thread-safe rate limiter in Swift 6: max 5 requests per second, no third-party libraries. Before writing any code, compare a sliding-window log against a token bucket for this use case — memory, burst behavior, precision — and recommend one. Do not generate code yet."
+
+> **Generate:** "Implement the sliding-window version as a Swift `actor` called `RateLimiter`. Public API: `func allow() -> Bool`. Store timestamps in a private array; prune anything older than 1 second on each call. No locks, no `DispatchQueue` — the actor is the synchronization."
+
+> **Review hook:** "Before I accept this: walk me through what happens when two Tasks call `allow()` at the same instant. Where exactly does the serialization happen?"
+
+> **Test:** "Write a Swift Testing suite: one test proving 5 requests pass and the 6th is rejected, and one test that fires 100 concurrent `allow()` calls from a TaskGroup and asserts no more than 5 succeed per window."
+
+**What you're watching for in the output:** the LLM reaching for `DispatchQueue.sync` or `NSLock` inside the actor (redundant), using `Timer` to "reset" counts (the burst loophole from the Poor Answer), or writing tests that `Task.sleep` and hope.
+
+## 6. The Follow-Up (Mid-Interview Extension)
+**Interviewer:** "Two extensions. First: storing thousands of timestamps could be a memory issue if the limit was 10,000 requests per minute instead of 5 per second — optimize the memory. Second: callers now want to *wait* for the next available slot instead of being rejected. Change the API."
+
+## 7. The Ideal Discussion
+> *"For memory, I'd switch to the Token Bucket algorithm. Instead of storing every timestamp, the actor stores two values: `availableTokens` and `lastRefillTime`. On each request we compute the elapsed time, refill proportionally (capped at bucket size), and decrement if a token is available. That's O(1) memory regardless of volume.
 > 
-> Instead of storing every timestamp, the actor only needs to store two values: `availableTokens` (an integer) and `lastRefillTime` (a Date).
-> 
-> When a request comes in, we calculate the time elapsed since `lastRefillTime`. We multiply that elapsed time by the refill rate to see how many new tokens to add to `availableTokens` (capping at the maximum bucket size). 
-> 
-> If `availableTokens > 0`, we decrement it and allow the request. This reduces the memory footprint to O(1) regardless of the rate limit volume."*
+> For waiting instead of rejecting, I'd change the API from `allow() -> Bool` to `func acquire() async`. Inside the actor, if no token is available, compute the time until the next refill and `try await Task.sleep(for:)` — then re-check, because another caller may have taken the token while we slept; this needs a loop, not an `if`. Two things I'd flag before asking the LLM to write it: first, sleeping inside the actor method does **not** block the actor — the actor is re-entrant across suspension points, which is exactly what we want but also what the re-check loop must account for. Second, `acquire()` must support cancellation: if the caller's Task is cancelled while waiting, `Task.sleep` throws and we should propagate, not swallow, that error."*

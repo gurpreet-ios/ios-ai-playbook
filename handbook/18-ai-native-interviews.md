@@ -20,19 +20,32 @@ In the AI-native era, the weight has shifted toward **Design, Debugging, and Rev
 | **Debugging** | Fixing a syntax error. | Finding a race condition in a multi-threaded, multi-module system. |
 | **Code Review** | Pointing out missing semicolons or bad variable names. | Identifying architectural drift, retain cycles, and scaling bottlenecks. |
 
-## 2. How to Use the Interview Playbook
+## 2. The Two Question Types
 
-This repository contains a dedicated `interview-playbooks/` folder with structured mock interviews across three formats (machine coding, architecture, and code review). These are not just "questions and answers." They are structured simulations.
+Strip away the branding and almost every vibe-coding interview is one of two questions:
+
+### Type 1: Build from Scratch
+You get a product requirement, an LLM, and ~45 minutes: *"Build a feature that shows nearby restaurants with infinite scroll."* You are expected to run a planning session with the LLM (architecture, component hierarchy, state management) **before any code exists**, then generate one logical piece at a time, reviewing everything. You are explicitly *not* expected to type the code yourself — and you *are* expected to catch the LLM's lifecycle bugs, missing error states, and memory leaks as they appear.
+
+### Type 2: Debug the Unfamiliar Codebase
+You get an existing app you have never seen and a vague symptom: *"The list stutters when scrolling."* The evaluated skill is context-building speed — using the LLM to map the code instead of reading every file — followed by a disciplined hypothesis → trace → fix → defend loop. Jumping straight to fixes without a stated hypothesis is the fastest way to fail this round.
+
+Both types run on the same spine: **Plan → Review → Fix.** Expect a **mid-interview extension** in either type ("now add offline mode", "now handle pagination") — it is scripted, and it tests whether you can drive the LLM into new territory without breaking the existing design.
+
+## 3. How to Use the Interview Playbook
+
+This repository contains a dedicated `interview-playbooks/` folder with structured mock interviews across four formats — machine coding, architecture, code review, and debugging (Type 2 above). These are not just "questions and answers." They are structured simulations.
 
 Every mock interview in the playbook follows this format:
 1. **The Prompt:** The ambiguous question the interviewer asks.
 2. **Expected Reasoning:** What the interviewer is *actually* trying to evaluate.
 3. **The Poor Answer:** How a Junior/Mid-level engineer answers (usually jumping straight to code).
 4. **The Great Answer:** How a Senior/Staff engineer answers (asking clarifying questions, defining constraints, evaluating tradeoffs).
-5. **The Follow-Up:** The curveball the interviewer throws when you answer perfectly.
-6. **The Ideal Discussion:** A transcript of a successful back-and-forth.
+5. **Driving the LLM:** The vibe-coding prompt sequence for this exact question — the Plan → Review → Fix loop in practice.
+6. **The Follow-Up:** The mid-interview extension the interviewer throws when you answer perfectly.
+7. **The Ideal Discussion:** A transcript of a successful back-and-forth.
 
-## 3. The Core Competencies
+## 4. The Core Competencies
 
 When practicing the mock interviews, focus on demonstrating these three competencies:
 
