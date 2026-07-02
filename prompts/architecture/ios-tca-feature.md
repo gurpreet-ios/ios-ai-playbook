@@ -1,6 +1,6 @@
 ---
 name: iOS TCA Feature Scaffolding
-description: Generates the boilerplate State, Action, Environment, and Reducer for a new TCA feature.
+description: Generates the boilerplate @Reducer (State, Action) and @Dependency clients for a new TCA feature.
 category: architecture
 platform: iOS
 ---
@@ -29,4 +29,4 @@ Return the code wrapped in standard markdown Swift blocks.
 Include the following files:
 1. `[FeatureName]Feature.swift` (The Reducer, State, Action)
 2. `[FeatureName]View.swift` (An empty View struct holding the `Store`)
-3. `[FeatureName]Environment.swift` (Dependency Definitions)
+3. `[FeatureName]Dependencies.swift` (`DependencyKey` conformances and `DependencyValues` extensions — NOT a legacy `Environment` type)

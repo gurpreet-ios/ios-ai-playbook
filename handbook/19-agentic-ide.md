@@ -8,28 +8,32 @@ An Agentic IDE doesn't just autocomplete a line of code; it reads your entire re
 
 ---
 
-## 1. Cursor vs. Windsurf vs. Copilot
+## 1. The Tool Landscape: Four Generations
 
-### GitHub Copilot (The Autocomplete Era)
-Copilot in its original form is "reactive." You write a comment, it writes a function. It is incredibly useful for boilerplate, but it lacks the autonomy to design systems. It is essentially a very smart keyboard.
+### Autocomplete Assistants (e.g., classic GitHub Copilot)
+The first generation is "reactive." You write a comment, it writes a function. Incredibly useful for boilerplate, but it lacks the autonomy to design systems. It is essentially a very smart keyboard.
 
-### Cursor (The Composer Era)
-Cursor introduced the `Cmd+K` (inline generation) and the `Composer` (multi-file generation) paradigms. 
-* **The Magic:** Cursor's primary advantage is its codebase indexing. It understands the relationship between your database schema in `schema.prisma` and your UI component in `Profile.tsx` without you needing to explicitly paste both into the chat.
+### Agentic IDEs (e.g., Cursor, Windsurf)
+These introduced inline generation (`Cmd+K`) and multi-file agents (Composer/Flows).
+* **The Magic:** Codebase indexing. The IDE understands the relationship between your SwiftData schema and your SwiftUI view without you explicitly pasting both into the chat.
 * **The Danger:** Because it can edit 10 files at once, a poorly scoped prompt can instantly corrupt your entire architecture (see Chapter 17 on Architecture Drift).
 
-### Windsurf (The Flow State)
-Windsurf introduced "Flows"—agents that act proactively rather than reactively. While Cursor waits for your command, a true Agentic IDE can watch you type a failing test, automatically read the stack trace, and propose the fix in the background before you even ask for it.
+### Terminal-First Agents (e.g., Claude Code)
+The current center of gravity. A terminal agent is not bound to an editor window: it reads files, edits across the repository, runs builds and tests, executes git operations, and iterates on failures in a loop — all from the command line. Because it lives in the shell, it composes with everything else in your toolchain (simulators, linters, CI scripts) and can be scripted, scheduled, and run headlessly in CI (Chapter 20). Many teams now pair a terminal agent for feature work with an IDE for review and navigation.
+
+### The IDE Itself (Xcode Intelligence)
+Xcode now ships its own AI assistance — inline generation, fix-it suggestions, and conversational help wired into the build system. It has the context advantage (it *owns* the build graph and the error stream) but less autonomy than a dedicated agent. Treat it as the inner loop; treat agents as the outer loop.
+
+### The iOS Reality Check: Agents Can't Press Cmd+R
+Most agentic tooling grew up in the web world, where "run the app" means `npm run dev`. On iOS, the verification loop runs through Xcode: build, install to a simulator, interact, read logs. To make any agent genuinely useful for iOS work, you must give it that loop — usually via the terminal (`xcodebuild`, `xcrun simctl`) or an MCP server that exposes build/run/screenshot/log tools (Chapter 21). An agent that cannot build and run your app is only ever guessing that its code works.
 
 ---
 
-## 2. Setting Up the `.cursorrules`
+## 2. Setting Up the Rules File
 
-To master an Agentic IDE, you must define its boundary constraints. You do this via a `.cursorrules` (or equivalent `.windsurfrules`) file at the root of your repository. 
+To master an agentic tool, you must define its boundary constraints. You do this via a rules file at the root of your repository. Every tool reads its own flavor — `.cursorrules`/`.windsurfrules` for the agentic IDEs, `CLAUDE.md` for Claude Code, and the cross-tool `AGENTS.md` convention that most agents now honor — but the content is the same idea: the permanent System Prompt for anything that touches your codebase. Write the rules once, and symlink or mirror them so every tool sees the same constraints.
 
-This file acts as the permanent System Prompt for the IDE's agents.
-
-### Example `.cursorrules` Snippet:
+### Example Rules-File Snippet:
 ```markdown
 # Role
 You are a Principal iOS Engineer. 
@@ -44,7 +48,7 @@ You are a Principal iOS Engineer.
 - All network logic must happen in injected `Repository` classes, not ViewModels.
 ```
 
-Without this file, the IDE will hallucinate outdated patterns. With this file, the IDE operates like a Senior Engineer trained exactly on your company's ADRs.
+Without this file, the agent will hallucinate outdated patterns. With this file, it operates like a Senior Engineer trained exactly on your company's ADRs.
 
 ---
 

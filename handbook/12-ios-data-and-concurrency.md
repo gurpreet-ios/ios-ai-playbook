@@ -47,8 +47,14 @@ If you ask an AI to write a network fetcher, it will often write it using closur
 * **Scaffolding:** "Write a `NetworkClient`. It must be an `actor` to isolate its internal cache. Use `async/await` for all network calls. Ensure the returned models are `Sendable`."
 * **Review:** `prompts/review/swift-concurrency-audit.md` (Run this relentlessly against AI-generated code to catch MainActor violations).
 
+### The Swift 6.2 Shift: MainActor by Default
+Swift 6.2 introduced "approachable concurrency": a per-module default-isolation setting (`.defaultIsolation(MainActor.self)` in the package manifest) that makes everything in the module implicitly `@MainActor` unless it opts out. This matters enormously for prompting, because the correct annotations for a file now depend on a **build setting the AI cannot see**. Always tell it which world it's in:
+* *"This module builds with default MainActor isolation. Do not sprinkle `@MainActor` everywhere — only annotate the types that must run OFF the main actor (`nonisolated`, or a dedicated `actor`)."*
+
+Under the old Swift 6.0 default, the opposite instruction applies. An AI that guesses wrong produces code that is either noisy or doesn't compile.
+
 ### Interview Answer
-> *"Concurrency is the hardest thing to get right in iOS. The beauty of Swift 6 is that the compiler now proves thread safety for us. I strictly use `actor` for shared mutable state and explicitly mark UI-driving ViewModels with `@MainActor`. I avoid un-checked `Sendable` conformances unless absolutely necessary."*
+> *"Concurrency is the hardest thing to get right in iOS. The beauty of Swift 6 is that the compiler now proves thread safety for us. I strictly use `actor` for shared mutable state and explicitly mark UI-driving ViewModels with `@MainActor`. I avoid un-checked `Sendable` conformances unless absolutely necessary. With 6.2's default-isolation modes, the first thing I check is the module's isolation setting — it decides what 'correctly annotated' even means."*
 
 ---
 

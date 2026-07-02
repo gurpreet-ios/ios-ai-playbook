@@ -9,7 +9,7 @@ This will teach you the fundamentals of **Context Engineering** and **Constraint
 ## Step 1: The Setup
 
 1. Open Xcode and create a new project. Select "App" and name it `HelloTodo`. Ensure the interface is set to **SwiftUI**.
-2. Do **not** check the "Use SwiftData" box. We are going to make the AI write the data layer manually so you understand how to prompt for it.
+2. Do **not** check the "Use SwiftData" box. We *will* use SwiftData — but instead of letting Xcode's template generate the data layer, you are going to prompt the AI to build it, so you learn how to ask for it.
 3. Open your project folder in your AI editor (Cursor, Windsurf, or VSCode with Copilot).
 4. Create a file named `.cursorrules` in the root of your project folder and paste this inside:
 
@@ -59,11 +59,15 @@ Now that the Data and Logic are done, the UI is trivial.
 > **Prompt 3: The UI**
 > "Now, generate the `ContentView.swift`. 
 > It should display a `List` of the `TodoItem`s, sorted by timestamp.
-> Use the `@Query` macro to fetch the items.
-> Add a TextField at the top to add new items, and a swipe-to-delete modifier on the list rows.
+> Use the `@Query` macro to fetch the items — reads stay reactive and live.
+> Create the `TodoListViewModel` from the previous step (passing in the `modelContext` from the environment) and route **every mutation** through it:
+> - A TextField at the top calls `viewModel.add(...)`.
+> - Tapping a row calls `viewModel.toggle(...)`.
+> - Swipe-to-delete calls `viewModel.delete(...)`.
+> 
 > Make the row text strikethrough if `isCompleted` is true."
 
-**What you learn here:** You gave the AI specific UX requirements (swipe-to-delete, strikethrough). Because the database and logic were already written, the AI easily hooks up the SwiftUI modifiers.
+**What you learn here:** You gave the AI specific UX requirements (swipe-to-delete, strikethrough), and you made the three prompts *compose*: `@Query` drives the reads reactively, while every write goes through the ViewModel you built in Prompt 2 — which is the piece you can unit test later. If you skip that wiring, the AI will happily mutate the database directly from the View and your ViewModel becomes dead code.
 
 ## Step 5: Run It!
 

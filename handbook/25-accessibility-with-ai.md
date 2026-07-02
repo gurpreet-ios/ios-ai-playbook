@@ -42,4 +42,12 @@ You cannot trust the AI to always remember these rules. Use the AI to audit its 
 **Use this prompt for code review:**
 > "Review this SwiftUI file specifically for Accessibility. Identify any missing `.accessibilityLabel` modifiers on images, any hardcoded font sizes that break Dynamic Type, and any interactive elements missing `.accessibilityAddTraits`. Provide a unified diff to fix these issues."
 
-By forcing the AI to think about Accessibility *before* generating code, you save hours of retroactive manual auditing and build truly inclusive products at scale.
+## Automating the Audit in UI Tests
+
+Static review only catches what's visible in the source. Xcode also ships a runtime audit you can call from any XCUITest: `try app.performAccessibilityAudit()`. It inspects the *rendered* screen for missing labels, insufficient contrast, Dynamic Type clipping, and undersized touch targets — the same checks as the Accessibility Inspector, but runnable in CI.
+
+This is the perfect AI pairing: the prompt above fixes the code, and this prompt turns accessibility into a regression gate:
+
+> "Generate an XCUITest suite that launches the app, navigates to each top-level tab, and calls `performAccessibilityAudit()` on every screen. Where a third-party view triggers unfixable issues, use the audit's issue-filtering closure to exempt it — with a comment explaining why."
+
+By forcing the AI to think about Accessibility *before* generating code — and wiring the runtime audit into CI so regressions can't land — you save hours of retroactive manual auditing and build truly inclusive products at scale.

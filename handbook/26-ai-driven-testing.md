@@ -6,6 +6,14 @@ Testing is historically the most neglected part of software development because 
 
 As a Senior AI Engineer, you should use AI to generate the bulk of your testing infrastructure — the mocks, stubs, and setup boilerplate — allowing you to focus purely on defining the assertions and edge cases.
 
+## The Framework Baseline: Swift Testing First
+
+All new test code should use **Swift Testing** (`import Testing`): `@Test` functions, `#expect(...)` assertions, `@Suite` structs, and parameterized tests. It is Swift-concurrency-native (`async` test functions just work) and its macro-based API gives the AI far less ceremony to hallucinate. Keep `XCTest` for legacy suites and for what Swift Testing doesn't cover (UI tests, performance tests).
+
+You must constrain the AI explicitly, because a decade of XCTest tutorials dominates its training data:
+
+> "Write the tests using Swift Testing (`import Testing`, `@Test`, `#expect`, `#require`). Do NOT use XCTest, `XCTAssert*`, or `expectation(description:)`."
+
 ## The Mock Generation Strategy
 
 If you have adhered to the architectural rules in Chapter 11 (Protocol-based Dependency Injection), mocking is trivial.
@@ -32,4 +40,4 @@ LLMs are prone to generating "tautological tests"—tests that simply repeat the
 Always check:
 1. Did the AI test the *behavior* or just the *implementation*?
 2. Did it mock the dependencies correctly, or did it instantiate real network clients?
-3. Did it use `XCTest` expectations for async code properly? (e.g., `expectation(description:)` instead of `try await Task.sleep()`).
+3. Did it handle async code natively (an `async` `@Test` function that simply `await`s), or did it hallucinate the legacy XCTest `expectation(description:)` dance — or worse, `try await Task.sleep()` and hope?

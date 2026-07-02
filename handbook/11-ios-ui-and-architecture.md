@@ -17,6 +17,9 @@ When prompting an LLM to generate SwiftUI, you must enforce strict constraints t
 * **Bad Prompt:** "Build a settings screen."
 * **Senior Prompt:** "Build a `SettingsView` in SwiftUI. Use `Form` and `Section` components. All state must be injected via `@Environment` or passed down as `@Binding`. Do NOT use `@State` internally unless the state is purely ephemeral (like a disclosure group's expanded state)."
 
+### The Design-Language Trap
+AI models default to the design language of their training data. Since iOS 26 the system look is **Liquid Glass** (`.glassEffect()`, `.buttonStyle(.glass)`); if you target it, say so explicitly, or the AI will hand you a faked frosted look built from `.ultraThinMaterial` and shadows. Chapter 27 covers the full aesthetic vocabulary.
+
 ### Tradeoffs
 - **Pros:** Massively reduced boilerplate; AI can generate full screens with perfect preview fidelity in seconds.
 - **Cons:** Complex view hierarchies can lead to massive recompilations if state isn't scoped correctly.

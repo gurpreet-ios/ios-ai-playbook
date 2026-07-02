@@ -20,7 +20,7 @@ When writing documentation for an AI, you must remove ambiguity and focus on har
 > CONSTRAINT: All local persistence MUST use `SwiftData` via the `@Model` macro. Do not use CoreData."
 
 ### The "Rules" File
-Every repository must have a root rules file (`.cursorrules`, `.windsurfrules`, or a global `AI_INSTRUCTIONS.md`). This is the permanent system prompt for your IDE.
+Every repository must have a root rules file. The names vary by tool — `.cursorrules`/`.windsurfrules` for the agentic IDEs, `CLAUDE.md` for Claude Code, and the cross-tool `AGENTS.md` convention — but they are all the same artifact: the permanent system prompt for any agent that touches your codebase. Maintain the content once and mirror it into whichever filenames your team's tools read; nothing rots trust faster than two rules files that disagree.
 
 ## 2. Tech Specs and RFCs
 

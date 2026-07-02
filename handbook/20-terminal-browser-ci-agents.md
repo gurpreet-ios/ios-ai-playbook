@@ -15,6 +15,15 @@ A terminal agent is an LLM with read/write access to your shell.
 - **DevOps Scripting:** *"Write a bash script that finds all `.png` files in the `assets/` folder, compresses them using `imageoptim`, and outputs a markdown table of the space saved."*
 - **Log Parsing:** *"Tail the server logs and grep for any error related to the database connection. Summarize the frequency of the error."*
 
+### The iOS Loop: xcodebuild and simctl
+For an iOS engineer, the terminal agent's killer feature is that it can drive the toolchain Xcode hides behind buttons:
+
+- **Build & test:** *"Build the app for the iPhone 16 simulator and run the unit tests. If anything fails, read the errors and fix them, then build again until it's green."* The agent loops over `xcodebuild build` / `xcodebuild test`, reads the compiler output, and iterates — the single biggest productivity unlock of terminal agents on iOS.
+- **Simulator control:** `xcrun simctl` lets the agent boot simulators, install builds, take screenshots, push notifications, and set locations: *"Install the build on a booted simulator, take a screenshot of the launch screen, and check the logs for the 'migration failed' error."*
+- **Signing & logs:** *"Explain why codesigning failed for the Release configuration"* — pasting `security find-identity` output and provisioning-profile errors at an agent beats deciphering them manually.
+
+This is the loop Chapter 19 called the iOS reality check: an agent that can build, install, screenshot, and read logs can *verify* its own work instead of guessing.
+
 ### Security Warning
 Never run a terminal agent as `root`. A hallucinating agent can accidentally run `rm -rf /` or overwrite critical system configurations. Always use a sandboxed user or verify the command before execution.
 
@@ -34,6 +43,8 @@ Browser agents have the ability to navigate web pages, click elements, extract d
 ## 3. CI (Continuous Integration) Agents
 
 The holy grail of Agentic Engineering is removing human bottlenecks from the PR review and merge process.
+
+**The iOS constraint first:** iOS CI runs on macOS runners (GitHub Actions `macos-*` images, Xcode Cloud, or self-hosted Macs), which are slower and pricier than Linux boxes. That makes agents *more* valuable here, not less — every "pull the branch, fix the test, push again" round trip a human skips costs 20+ minutes of macOS runner queue time.
 
 ### The Automated Code Reviewer
 You can configure a CI agent (using GitHub Actions + an LLM) to run on every Pull Request.

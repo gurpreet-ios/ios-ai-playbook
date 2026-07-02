@@ -28,7 +28,7 @@ MVVM separates the UI (View) from the business logic and state (ViewModel). The 
 
 ### AI Prompts
 - **Scaffolding:** `prompts/architecture/mvvm-scaffold.md` 
-  - *"Generate the ViewModel and View using MVVM. The ViewModel must be fully isolated on the MainActor, and all state must be marked `@Published` (or `@Observable`)."*
+  - *"Generate the ViewModel and View using MVVM. The ViewModel must be a `@MainActor` class using the `@Observable` macro (per `adrs/002-observation-over-combine.md`) — do not use `ObservableObject` or `@Published`."*
 - **Review:** `prompts/review/mvvm-audit.md`
   - *"Review this ViewModel. Flag any UIKit/Foundation imports that belong in the View. Flag any missing `MainActor` annotations."*
 
@@ -105,7 +105,7 @@ Derived from React, Redux (and its Swift equivalent, TCA) relies on a single glo
 
 ### AI Prompts
 - **Scaffolding:** `prompts/architecture/ios-tca-feature.md`
-  - *"Generate the State, Action, Environment, and Reducer for a TCA module."*
+  - *"Generate a TCA feature using the `@Reducer` macro: the `State` struct, the `Action` enum, and the `@Dependency` clients it needs. Do not use the legacy `Environment` type — it was removed from TCA years ago, and models trained on old tutorials still reach for it."*
 - **Review:** *"Audit this Reducer. Ensure no side-effects are performed outside of the `Effect` (or `run`) closure. Verify State is not mutated asynchronously."*
 
 ---
