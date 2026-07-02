@@ -89,3 +89,80 @@ Downloading a massive image and shoving it into an `Image` view forces the main 
 ---
 
 Performance engineering with AI is a partnership. The AI is a terrible profiler, but an excellent refactorer. Your job is to run the Instruments, find the exact bottleneck, and give the AI the highly specific prompt required to rewrite it.
+
+---
+
+## The Running Example: MusicApp's Library Stutter, End to End
+
+> *Continuing the Part 3 spine ([`sample-apps/music-interview-app`](../sample-apps/music-interview-app)). The catalog above lists the bottleneck species; here is one full hunt — symptom → Instruments → prompt → fix → proof.*
+
+### The Symptom
+
+`LibraryView` renders tracks in a horizontal `LazyHStack` of 160pt cards. The shipped skeleton draws placeholder rectangles; the obvious next prompt — *"show the album artwork from `track.coverURL` in each card"* — produced this:
+
+```swift
+// ❌ Inside the card view's body
+if let coverURL = track.coverURL,
+   let data = try? Data(contentsOf: coverURL),      // network/disk I/O, synchronous
+   let image = UIImage(data: data) {                 // full-res decode, on main
+    Image(uiImage: image)
+        .resizable()
+        .frame(width: 160, height: 160)
+}
+```
+
+On the simulator over localhost: imperceptible. On a mid-range device: the scroll hitches every time a new card enters the viewport. This gap is worth internalizing — **AI-generated performance bugs are invisible on the machines where AI-generated code gets demoed.**
+
+### The Investigation (You, Not the AI)
+
+The AI cannot run Instruments, so this step is yours. Time Profiler, real device, one slow scroll across the library:
+
+1. The main thread shows repeating ~180ms blocks aligned with each hitch.
+2. The heaviest stack: `LibraryCard.body` → `Data.init(contentsOf:)` — **synchronous URL I/O on the main thread**, per card, per first appearance.
+3. Beneath it, `UIImage(data:)` → `ImageIO` decode frames: the JPEGs are 1500×1500 (≈9MB decoded) being drawn into 160pt tiles — roughly 25× more decoded pixels than the screen uses.
+4. Cross-check with the **Hitches** instrument: hitch time ratio ~140ms/s while scrolling. (Anything above ~5ms/s is user-visible; this is a catastrophe.)
+
+Two distinct crimes, one line of code: blocking I/O in a view body, and decode-at-full-resolution. A vague "make it faster" prompt would let the AI fix one, claim victory, and leave the other.
+
+### The Prompt (Evidence In, Scope Bounded)
+
+> *"Time Profiler on device shows `LibraryCard.body` blocking the main thread in `Data(contentsOf:)` (~180ms per new card) and decoding 1500×1500 JPEGs for 160pt cells. Fix exactly this, in a new `ArtworkLoader`: (1) fetch bytes with `URLSession.data(from:)` — async, never `Data(contentsOf:)`; (2) downsample during decode to the target pixel size with `CGImageSourceCreateThumbnailAtIndex` (`kCGImageSourceCreateThumbnailFromImageAlways`, `kCGImageSourceThumbnailMaxPixelSize` = 160 × screen scale), off the main actor; (3) cache decoded images in an `NSCache` keyed by URL with `totalCostLimit` set in bytes; (4) the card uses `.task(id: track.coverURL)` so loads cancel when cells are reused. Do not touch the ViewModel or repository. List what you did NOT fix."*
+
+Every clause traces back to a profiler fact. The AI's job is transcription into correct code, not diagnosis.
+
+### The Fix (Shape of the Result)
+
+```swift
+actor ArtworkLoader {
+    private let cache = NSCache<NSURL, UIImage>()
+
+    func artwork(for url: URL, targetSize: CGFloat, scale: CGFloat) async throws -> UIImage {
+        if let hit = cache.object(forKey: url as NSURL) { return hit }
+        let (data, _) = try await URLSession.shared.data(from: url)
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceThumbnailMaxPixelSize: targetSize * scale,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+        ]
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
+        else { throw ArtworkError.undecodable }
+        let image = UIImage(cgImage: cg)
+        cache.setObject(image, forKey: url as NSURL,
+                        cost: cg.bytesPerRow * cg.height)
+        return image
+    }
+}
+```
+
+The card's body shrinks to a cache-or-placeholder read plus a `.task(id:)` that loads asynchronously — zero I/O, zero decoding at render time.
+
+### The Verification (Close the Loop)
+
+The claim "it's faster" is checkable, so check it — same device, same scroll gesture:
+
+- Time Profiler: `LibraryCard.body` gone from the heavy stacks; decode now appears on a background queue under `ArtworkLoader`.
+- Hitches instrument: hitch time ratio from ~140ms/s to under 2ms/s.
+- Memory gauge: steady-state down ~70MB — the accidental payoff of downsampling; 160pt thumbnails cost ~100KB each, not 9MB.
+
+And the regression guard, because the next AI session will happily reintroduce `Data(contentsOf:)`: a rules-file line (*"no synchronous I/O or image decoding in any view body — artwork goes through `ArtworkLoader`"*) plus the `.task(id:)` pattern as the documented example. The profiler found the bug; the ADR keeps it dead.

@@ -126,3 +126,77 @@ You cannot manually run a 50-point checklist on a 2,000-line AI-generated PR. Yo
 As covered in Chapter 5, you should have dedicated Prompts for each of these audits. You feed the PR diff into the `security-owasp-audit.md` prompt, then the `swift-concurrency-audit.md` prompt. You let the AI flag the low-level violations, so you can focus on the Staff-level architectural decisions.
 
 By shifting your focus from syntax errors to architectural integrity, you can safely shepherd massive volumes of AI-generated code into production without sacrificing stability.
+
+---
+
+## The Running Example: Reviewing a Real AI PR Against the ADRs
+
+> *Continuing the Part 3 spine ([`sample-apps/music-interview-app`](../sample-apps/music-interview-app)). Theory above; now an actual review. The PR below is what a capable agent produced for "add a Recently Played section to the Library screen" — it compiles, it works in the simulator, and it should not merge.*
+
+### The Diff (condensed)
+
+```diff
++ // Sources/Services/RecentlyPlayedManager.swift
++ import Combine
++
++ final class RecentlyPlayedManager: ObservableObject {
++     static let shared = RecentlyPlayedManager()
++     @Published var recentTrackIDs: [UUID] = []
++
++     private init() {
++         let raw = UserDefaults.standard.stringArray(forKey: "recentlyPlayed") ?? []
++         recentTrackIDs = raw.compactMap(UUID.init)
++     }
++
++     func markPlayed(_ id: UUID) {
++         recentTrackIDs.removeAll { $0 == id }
++         recentTrackIDs.insert(id, at: 0)
++         UserDefaults.standard.set(recentTrackIDs.map(\.uuidString),
++                                   forKey: "recentlyPlayed")
++     }
++ }
+```
+```diff
+  // Sources/ViewModels/PlayerViewModel.swift
+  public func play(track: Track, in queue: [Track] = []) async {
+      currentTrack = track
++     RecentlyPlayedManager.shared.markPlayed(track.id)
+      self.queue = queue.isEmpty ? [track] : queue
+      await audioEngine.play(url: track.offlineFileURL ?? track.streamURL)
+  }
+```
+```diff
+  // Sources/Views/LibraryView.swift
++ @StateObject private var recents = RecentlyPlayedManager.shared
++ // …
++ Section("Recently Played") {
++     ForEach(recents.recentTrackIDs, id: \.self) { id in
++         if let track = try? modelContext.fetch(
++             FetchDescriptor<Track>(predicate: #Predicate { $0.id == id })
++         ).first {
++             TrackRow(track: track)
++         }
++     }
++ }
+```
+
+### The Review, Tier by Tier
+
+**Compiler pass:** green. Phantom APIs ruled out. This is precisely the PR that survives a lazy review — every remaining defect is architectural.
+
+**Senior pass — the diff against the ADRs:**
+
+1. **`ObservableObject` + `@Published` + Combine** — direct violation of `adrs/002-observation-over-combine.md`. This is *training-data gravity* (the Chapter 12 failure mode): the model reverted to the pattern it has seen most, not the one the repo mandates.
+2. **`UserDefaults` as a store** — violates the state rules (`adrs/004-state-management.md`) and bypasses `adrs/001-swiftdata-over-coredata.md`. Recently-played is *queryable domain data* (it references `Track` rows); it belongs in SwiftData — a `lastPlayedAt: Date?` attribute on `Track` makes the whole feature one sorted `FetchDescriptor`. The AI invented a second, unsynchronized source of truth instead.
+3. **`static let shared` singleton, reached from inside `PlayerViewModel`** — a hidden dependency wired around the composition root (Chapter 9). Untestable and invisible to anyone reading `PlayerViewModel`'s initializer.
+4. **Database fetch inside `LibraryView.body`** — a synchronous `modelContext.fetch` *per row per render*: architecture drift (data access belongs in `TrackRepository`) and a Chapter 15 performance bug in embryo. Also note `try?` — a swallowed error, the happy-path bias in one character.
+
+**The meta-observation:** this one small PR exhibits four of the five failure modes from Part A. That density is normal for AI-generated code. It is also why the tiers exist: no line-by-line reading catches "this entire file shouldn't exist."
+
+### The Anchor Prompt, Not the Manual Fix
+
+Fixing this by hand makes you the AI's junior. The review comment goes back into the loop instead:
+
+> *"This PR violates our ADRs. Re-read `adrs/001-swiftdata-over-coredata.md`, `adrs/002-observation-over-combine.md`, and `adrs/004-state-management.md`, then rewrite: (1) delete `RecentlyPlayedManager` entirely; (2) add `lastPlayedAt: Date?` to the `Track` @Model; (3) `TrackRepository` gains `markPlayed(id:)` that stamps it and saves; (4) `PlayerViewModel.play` calls the repository it already owns — no singletons; (5) `LibraryView` gets recents from `LibraryViewModel`, backed by a `FetchDescriptor` sorted by `lastPlayedAt` — no fetches in view bodies. Keep the diff under 60 lines."*
+
+The rewrite came back at 41 lines, four files, zero new types — deletion as a review outcome. The measure of AI-era review is not "did we find the bugs" but "did the codebase's rules, written down where the AI must read them, make the second attempt smaller than the first."

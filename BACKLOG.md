@@ -31,7 +31,7 @@ _Last updated: 2026-07-02._
 | :-- | :-- | :-- | :-- | :-- |
 | 0 | Credibility & staleness fixes (second review pass, 2026-07-02) | 1 | P0 | Small |
 | 1 | Port polished shared chapters from Backend Edition | 1 | P1 | Small |
-| 2 | Running-example spine through Ch 9–16 | 2 | P1 | Large |
+| 2 | ✅ ~~Running-example spine through Ch 9–16~~ (done 2026-07-02: every chapter has a Running Example section on music-interview-app with a real failure mode; Ch 16 uses the app's actual composition-root crash; new graph-constructing regression test passes on simulator) | 2 | P1 | Large |
 | 3 | New chapters: Verification, CI/CD & Release, Security & Privacy, On-Device AI, Observability, Agentic Security & Cost | 2 | P1 | Large |
 | 4 | Deepen weakest chapters (Testing, A11y, Cheat Sheets, Breakdowns) | 2 | P1 | Med |
 | 5 | ADR library 5 → ~12 | 3 | P2 | Med |
@@ -58,16 +58,16 @@ Found in the 2026-07-02 second review pass. Cheap to fix, expensive to leave in 
 ### 1. Port polished shared chapters · P1 · Small
 Chapters 1–8, 19–21, 28–29 have near-identical twins in `../backend-playbook-draft/handbook/` that received reference fixes and small improvements (word deltas of +5 to +30 each). Diff each pair, back-port the fixes, re-flavor examples to Swift where the backend version went Go.
 
-### 2. Running-example spine through Ch 9–16 · P1 · Large
-The Backend Edition proved the format (its Checkout Service spine, chapters rebuilt to ~1,500 words with compilable code + failure modes). Do the same here with one flagship app (recommend evolving `music-interview-app`):
-- **Ch 9:** choose MVVM+Router for it; show the Massive-ViewModel trap.
-- **Ch 10:** modularize into Swift Packages; show a circular-dependency failure.
-- **Ch 11:** build the NowPlaying screen; Observation-scoped state; over-render fix.
-- **Ch 12:** offline sync engine — SwiftData + actor; a real data race caught by Swift 6.
-- **Ch 13:** widget + Live Activity across the App Group boundary (replaces the deleted `AIPlaybookSampleApp` promise).
-- **Ch 14:** review an actual AI-generated PR diff against the ADRs.
-- **Ch 15:** profile a real scroll stutter in it with Instruments; fix; verify.
-- **Ch 16:** debug a real crash in it end-to-end.
+### 2. ✅ Running-example spine through Ch 9–16 · P1 · Large — DONE 2026-07-02
+All eight chapters gained a "Running Example" section built on `music-interview-app` (introduced as the Part 3 spine in Ch 9), each with real code matching the repo API, a chapter-specific failure mode, and a prompt-that-prevents-it:
+- **Ch 9:** MVVM+Router decision narrative; the Massive-ViewModel trap; lifetime-scoped split (LibraryViewModel vs app-scoped PlayerViewModel); Router pattern.
+- **Ch 10:** SwiftPM modularization; the `cyclic dependency declaration found` failure; dependency-rule fix with TrackRepository as the orchestration home; context-bounding payoff.
+- **Ch 11:** NowPlayingView build; Observation property-level tracking; the 4Hz whole-screen over-render from `currentTime` and the subview-scoped fix.
+- **Ch 12:** offline download engine across three isolation domains; the `Task.detached` + `@Model` capture data race Swift 6 rejects at compile time; `@unchecked Sendable` waiver honesty; `@ModelActor` escalation criteria.
+- **Ch 13:** Now Playing widget + Live Activity; the silently-stale widget (fresh process, fresh singleton); App Group snapshot DTO pattern (scope-honest: SPM repo, code is what the extension targets contain).
+- **Ch 14:** full AI-generated "Recently Played" PR diff reviewed tier-by-tier against ADRs 001/002/004; four failure modes in one small PR; anchor-prompt rewrite outcome.
+- **Ch 15:** Library artwork scroll stutter; Time Profiler + Hitches evidence; downsampling `ArtworkLoader` actor fix; before/after verification numbers.
+- **Ch 16:** the app's own real composition-root crash (`@Environment(\.modelContext)` read in `init` → container-less context) debugged end-to-end; regression test added to the repo (`Tests/TrackRepositoryTests.swift`, constructs the real graph, passes on simulator).
 
 ### 3. New chapters · P1 · Large
 In priority order:
