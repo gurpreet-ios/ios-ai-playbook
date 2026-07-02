@@ -31,24 +31,11 @@ Most agentic tooling grew up in the web world, where "run the app" means `npm ru
 
 ## 2. Setting Up the Rules File
 
-To master an agentic tool, you must define its boundary constraints. You do this via a rules file at the root of your repository. Every tool reads its own flavor — `.cursorrules`/`.windsurfrules` for the agentic IDEs, `CLAUDE.md` for Claude Code, and the cross-tool `AGENTS.md` convention that most agents now honor — but the content is the same idea: the permanent System Prompt for anything that touches your codebase. Write the rules once, and symlink or mirror them so every tool sees the same constraints.
+To master an agentic tool, you must define its boundary constraints. You do this via a rules file (or a rules directory) at the root of your repository. 
 
-### Example Rules-File Snippet:
-```markdown
-# Role
-You are a Principal iOS Engineer. 
+Because rule management has evolved from a single `.cursorrules` monolith into modular directories (`.cursor/rules/*.mdc`) and cross-agent formats (`AGENTS.md`), this topic gets its own deep dive. 
 
-# Architecture Constraints
-1. We use MVVM + Observation. Do NOT use Combine (`@Published`).
-2. We use SwiftData. Do NOT generate CoreData XML or NSManagedObject.
-3. UI must be SwiftUI. Fallback to UIKit only via UIViewRepresentable.
-
-# Coding Style
-- Explicitly mark ViewModels with `@MainActor`.
-- All network logic must happen in injected `Repository` classes, not ViewModels.
-```
-
-Without this file, the agent will hallucinate outdated patterns. With this file, it operates like a Senior Engineer trained exactly on your company's ADRs.
+👉 **See [Chapter 19b: Structuring Agent Rules](19b-structuring-agent-rules.md)** for a complete guide on defining architectural and behavioral constraints, and avoiding rule-drift across multiple tools. Without these rules, the agent will hallucinate outdated patterns. With them, it operates like a Senior Engineer trained exactly on your company's ADRs.
 
 ---
 

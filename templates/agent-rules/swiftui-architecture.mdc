@@ -1,0 +1,19 @@
+---
+description: Architectural constraints for SwiftUI Views and ViewModels.
+globs: *.swift
+---
+
+# SwiftUI & MVVM Architecture
+
+## ViewModels
+- All ViewModels MUST be annotated with `@MainActor`.
+- Use the `@Observable` macro for ViewModels (Do NOT use `ObservableObject` or `@Published`).
+- Never perform network requests directly inside a ViewModel; inject a `Repository` or `Service` via the initializer.
+- Prefix ViewModels with the view name (e.g., `TodoListViewModel` for `TodoListView`).
+
+## Views
+- Use SwiftUI for all UI.
+- Fallback to UIKit only via `UIViewRepresentable` or `UIViewControllerRepresentable` when absolutely necessary.
+- Extract complex UI components into smaller, reusable `View` structs.
+- Use Apple's SF Symbols for iconography (`Image(systemName:)`).
+- Ensure all views are accessible by using `.accessibilityLabel()` and `.accessibilityValue()` where appropriate.

@@ -113,7 +113,7 @@ The AI can *fix* what the profiler finds; it cannot run the profiler. Symptom â†
 
 - **`Cmd+K` (Inline Edit):** Best for localized algorithmic fixes (e.g., *"Refactor this map/filter chain to be O(N)"*).
 - **Composer / Flow:** Best for multi-file generation (e.g., *"Generate a Settings feature based on `@SettingsRFC.md`."*).
-- **`.cursorrules` / `.windsurfrules`:** The most important file in your repository. It dictates the AI's default behavior.
+- **`.cursor/rules/` / `AGENTS.md`:** The most important configurations in your repository. They dictate the AI's default behavior and architecture.
 
 ---
 

@@ -1,0 +1,15 @@
+---
+description: Guidelines for defining and modifying SwiftData models.
+globs: *Model.swift, *Schema.swift
+---
+
+# SwiftData Model Constraints
+
+When generating or modifying data models, adhere to the following rules:
+
+- Use `SwiftData` via the `@Model` macro.
+- **DO NOT** use CoreData XML, `.xcdatamodeld` files, or `NSManagedObject`.
+- Ensure each model has a unique identifier (e.g., `@Attribute(.unique) var id: UUID`).
+- Define relationships explicitly (e.g., `@Relationship(deleteRule: .cascade)`).
+- When a model schema changes, write a thought block on whether a migration plan or versioned schema (`Schema.Version`) is needed.
+- Only mutate the model via the `ModelContext`. Do not create random wrapper classes for mutation unless specified in ADRs.

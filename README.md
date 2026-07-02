@@ -12,7 +12,7 @@ This is not a book about "vibe coding." It is a working resource for operating l
 
 | Section | Contents |
 | :-- | :-- |
-| [`handbook/`](handbook/) | The 30-chapter handbook (below) + the dated [Model Landscape appendix](handbook/appendix-model-landscape.md) |
+| [`handbook/`](handbook/) | The 37-chapter handbook (below) + the dated [Model Landscape appendix](handbook/appendix-model-landscape.md) |
 | [`prompts/`](prompts/README.md) | A starter library of production prompt systems — architecture, review, testing, performance |
 | [`adrs/`](adrs/README.md) | 5 Architecture Decision Records, each usable as an AI context anchor |
 | [`architecture-breakdowns/`](architecture-breakdowns/README.md) | Seed blueprints for deconstructing real products (Uber, Spotify, Instagram) with prompt sequences |
@@ -68,6 +68,7 @@ New to iOS or overwhelmed by "Actor Isolation" and "Context Windows"? Don't pani
 
 ### Part VIII — Agentic Engineering
 - [Chapter 19: The Agentic IDE](handbook/19-agentic-ide.md)
+- [Chapter 19b: Structuring Agent Rules](handbook/19b-structuring-agent-rules.md)
 - [Chapter 20: Terminal, Browser, and CI Agents](handbook/20-terminal-browser-ci-agents.md)
 - [Chapter 21: Tool Calling & MCP](handbook/21-tool-calling-mcp.md)
 
@@ -84,6 +85,16 @@ New to iOS or overwhelmed by "Actor Isolation" and "Context Windows"? Don't pani
 ### Part XI — AI Systems Engineering
 - [Chapter 28: Agentic AI & RAG Deep Dives](handbook/28-rag-and-custom-agents.md)
 - [Chapter 29: LLM Deployment Architecture](handbook/29-llm-deployment-architecture.md)
+
+### Part XII — Shipping to Production
+- [Chapter 30: Verifying AI Output at Scale](handbook/30-verifying-ai-output-at-scale.md)
+- [Chapter 31: CI/CD & Release Engineering](handbook/31-cicd-release-engineering.md)
+- [Chapter 32: Security & Privacy](handbook/32-security-and-privacy.md)
+- [Chapter 33: Observability & Production Health](handbook/33-observability-production-health.md)
+
+### Part XIII — The Frontier
+- [Chapter 34: On-Device AI & App Intents](handbook/34-on-device-ai-app-intents.md)
+- [Chapter 35: Agentic Security & Cost](handbook/35-agentic-security-and-cost.md)
 
 ### Appendix
 - [The Model Landscape](handbook/appendix-model-landscape.md) — the only place model names live, dated and bumpable.
@@ -107,5 +118,6 @@ The through-line is **context engineering**: the [ADRs](adrs/README.md) are not 
 2. **Chapters 4–8** — turn one-off prompts into repeatable prompt systems.
 3. **Parts IV–VI (9–17)** — the iOS substance: architecture, modern Swift, and the quality gauntlet (review → performance → debugging).
 4. **Parts VIII–XI (19–29)** — scale yourself across IDE, terminal, CI, and custom agents.
+5. **Parts XII–XIII (30–35)** — ship it: the verification stack, release engineering, security, observability — then the frontier: on-device AI, App Intents, and securing/metering the agentic workflow itself.
 
 Interviewing soon? Jump to [Chapter 18](handbook/18-ai-native-interviews.md), the [interview playbooks](interview-playbooks/README.md), and the sample-app trilogy above.

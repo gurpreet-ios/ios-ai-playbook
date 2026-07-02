@@ -2,7 +2,7 @@
 
 > "To build a skyscraper with robots, you do not tell them 'build a tall building.' You hand them the blueprint for the steel girders, then the blueprint for the plumbing, then the blueprint for the glass."
 
-Part XIII of this playbook focuses on **Real Products**. 
+This chapter and the `architecture-breakdowns/` directory focus on **Real Products**. 
 We take massive, complex applications (Uber, Spotify, Instagram) and break them down into the exact architectural components and AI Prompts required to build them.
 
 ## 1. Why Deconstruct Real Products?

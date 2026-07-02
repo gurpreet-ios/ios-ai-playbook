@@ -32,7 +32,7 @@ _Last updated: 2026-07-02._
 | 0 | ✅ ~~Credibility & staleness fixes (second review pass, 2026-07-02)~~ (done 2026-07-02: all sub-bullets verified in tree; App Intents coverage lands with item 3's On-Device AI chapter) | 1 | P0 | Small |
 | 1 | ✅ ~~Port polished shared chapters from Backend Edition~~ (done 2026-07-02: full diff of all 13 shared pairs — the iOS edition is now *ahead* of the backend twins after the Phase-1 polish; one genuine backend-only improvement ported: Ch 3 cache-miss coalescing review clause) | 1 | P1 | Small |
 | 2 | ✅ ~~Running-example spine through Ch 9–16~~ (done 2026-07-02: every chapter has a Running Example section on music-interview-app with a real failure mode; Ch 16 uses the app's actual composition-root crash; new graph-constructing regression test passes on simulator) | 2 | P1 | Large |
-| 3 | New chapters: Verification, CI/CD & Release, Security & Privacy, On-Device AI, Observability, Agentic Security & Cost | 2 | P1 | Large |
+| 3 | ✅ ~~New chapters: Verification, CI/CD & Release, Security & Privacy, On-Device AI, Observability, Agentic Security & Cost~~ (done 2026-07-02: Ch 30–35 written + wired into README as Parts XII–XIII; prompts/security/ recreated; bonus Ch 19b (agent rules) + templates/agent-rules/ landed alongside) | 2 | P1 | Large |
 | 4 | ✅ ~~Deepen weakest chapters (Testing, A11y, Cheat Sheets, Breakdowns)~~ (done 2026-07-02: Ch 26 full rewrite w/ tautology audit + new prompt file; Ch 25 end-to-end workflow w/ before/after; Ch 24 three reference tables; 3 breakdowns → full blueprints + README index) | 2 | P1 | Med |
 | 5 | ADR library 5 → ~12 | 3 | P2 | Med |
 | 6 | ✅ ~~Interview playbooks 3 → ~12 with full scripts~~ (done 2026-07-02: 14 playbooks across 4 categories incl. new `debugging/`; 7-part format with Driving the LLM; Ch 18 + README aligned) | 3 | P2 | Med |
@@ -69,8 +69,8 @@ All eight chapters gained a "Running Example" section built on `music-interview-
 - **Ch 15:** Library artwork scroll stutter; Time Profiler + Hitches evidence; downsampling `ArtworkLoader` actor fix; before/after verification numbers.
 - **Ch 16:** the app's own real composition-root crash (`@Environment(\.modelContext)` read in `init` → container-less context) debugged end-to-end; regression test added to the repo (`Tests/TrackRepositoryTests.swift`, constructs the real graph, passes on simulator).
 
-### 3. New chapters · P1 · Large
-In priority order:
+### 3. ✅ New chapters · P1 · Large — DONE 2026-07-02
+All six written (Ch 30–35, Parts XII–XIII in the README), plus Ch 19b "Structuring Agent Rules" + `templates/agent-rules/` landed alongside. Original priority list:
 1. **Verifying AI Output at Scale — iOS** (Swift Testing, snapshot tests, UI tests, Thread Sanitizer, screenshot diffing, CI gates). Mirror of the Backend Edition's flagship Ch 13.
 2. **CI/CD & Release Engineering** — code signing, fastlane/Xcode Cloud, TestFlight, App Review, phased rollout, the no-instant-rollback reality.
 3. **Security & Privacy** — Keychain, ATS, privacy manifests (`PrivacyInfo.xcprivacy`), required-reason APIs, secrets leaking into prompt context. Also recreate `prompts/security/` with real prompts (the empty placeholder dir was removed in Phase 1; the OWASP audit currently lives in `prompts/review/`).
