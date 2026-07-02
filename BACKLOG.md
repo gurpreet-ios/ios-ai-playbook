@@ -33,7 +33,7 @@ _Last updated: 2026-07-02._
 | 1 | Port polished shared chapters from Backend Edition | 1 | P1 | Small |
 | 2 | ✅ ~~Running-example spine through Ch 9–16~~ (done 2026-07-02: every chapter has a Running Example section on music-interview-app with a real failure mode; Ch 16 uses the app's actual composition-root crash; new graph-constructing regression test passes on simulator) | 2 | P1 | Large |
 | 3 | New chapters: Verification, CI/CD & Release, Security & Privacy, On-Device AI, Observability, Agentic Security & Cost | 2 | P1 | Large |
-| 4 | Deepen weakest chapters (Testing, A11y, Cheat Sheets, Breakdowns) | 2 | P1 | Med |
+| 4 | ✅ ~~Deepen weakest chapters (Testing, A11y, Cheat Sheets, Breakdowns)~~ (done 2026-07-02: Ch 26 full rewrite w/ tautology audit + new prompt file; Ch 25 end-to-end workflow w/ before/after; Ch 24 three reference tables; 3 breakdowns → full blueprints + README index) | 2 | P1 | Med |
 | 5 | ADR library 5 → ~12 | 3 | P2 | Med |
 | 6 | ✅ ~~Interview playbooks 3 → ~12 with full scripts~~ (done 2026-07-02: 14 playbooks across 4 categories incl. new `debugging/`; 7-part format with Driving the LLM; Ch 18 + README aligned) | 3 | P2 | Med |
 | 7 | Prompt library 18 → 40–60, chapter-mapped | 3 | P2 | Med |
@@ -78,11 +78,11 @@ In priority order:
 5. **Observability & Production Health** — MetricKit, crash triage with AI, os_signpost, hang/launch metrics.
 6. **Agentic Security & Cost** — prompt injection via tool results, secrets in context, blast radius, token economics (same gap the Backend Edition logged as its backlog #2).
 
-### 4. Deepen weakest chapters · P1 · Med
-- `26-ai-driven-testing.md` (338 words) → full chapter; lead with **Swift Testing** (`@Test`, `#expect`), keep XCTest for legacy; tautological-test audit workflow.
-- `25-accessibility-with-ai.md` → add a complete audit workflow with before/after code.
-- `24-cheat-sheets.md` → real reference tables (concurrency annotations, property wrappers, Instruments picker).
-- `architecture-breakdowns/*.md` (19 lines each) → 800–1,200-word blueprints with the prompt sequences Ch 23 promises.
+### 4. ✅ Deepen weakest chapters · P1 · Med — DONE 2026-07-02
+- `26-ai-driven-testing.md` → full rewrite (~1,700 words): Swift Testing API table, spy generation grounded in `AudioEngineSpy`, names-first TDD on MusicApp queue navigation, the tautological-test audit (mirror / implementation-echo / vacuous-async + the deletion test), async-stream testing without sleeps, the regression rule. New `prompts/testing/tautology-audit.md`.
+- `25-accessibility-with-ai.md` → "The Audit Workflow, End to End" on NowPlayingView: before/after code, VoiceOver transcripts, findings table, `performAccessibilityAudit()` gate, rules-file feedback loop.
+- `24-cheat-sheets.md` → three real reference tables: concurrency annotations (with the AI's classic misuse per row), SwiftUI property wrappers (incl. legacy-rejection row), Instruments picker (symptom → tool).
+- `architecture-breakdowns/*.md` → full blueprints (~1,000 words each): core domain, decision tables, 6-layer prompt sequences with per-layer "watch for" review hooks, failure-mode banks, cross-links to playbooks/sample apps (all links verified). README is now a real index.
 
 ### 5. ADR library 5 → ~12 · P2 · Med
 Each with the "AI Anchor Usage" section: modularization strategy, navigation/router, networking stack, image pipeline, DI approach, testing strategy, min-deployment-target policy, strict-concurrency adoption.
