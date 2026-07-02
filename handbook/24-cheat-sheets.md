@@ -57,7 +57,59 @@ LLMs ship the happy path. Before accepting any generated feature, probe every ro
 
 ---
 
-## 5. The Agentic IDE Cheat Sheet (Cursor/Windsurf)
+## 5. The Concurrency Annotation Cheat Sheet
+
+The compiler errors AI-generated Swift 6 code produces are almost always one of these picked wrong. What each annotation means, and when the AI reaches for it incorrectly:
+
+| Annotation | Meaning | Reach for it when | The AI's classic misuse |
+| :--- | :--- | :--- | :--- |
+| `@MainActor` | Type/member isolated to the main actor | UI state, ViewModels, `ModelContext` access | Slapping it on everything until errors stop (works, but serializes your whole app onto main) |
+| `actor` | Reference type with its own serialized executor | Shared mutable state off main: caches, connections, download managers | Forgetting every call becomes `await`; adding it to a type the UI reads per-frame |
+| `nonisolated` | Member opts out of its type's isolation | Pure functions on actors; immutable `let`s needed synchronously (e.g. from `init`) | Marking something `nonisolated` that touches actor state — instant compile error |
+| `nonisolated(unsafe)` | Opts out with **no checking** | Almost never; interop shims with proven external synchronization | Using it as an error-silencer — it deletes the diagnostic and keeps the race |
+| `Sendable` | Type is safe to cross isolation boundaries | Value types, immutable classes, checked automatically | Assuming classes get it for free (they don't — only final + immutable qualify) |
+| `@unchecked Sendable` | "Trust me" conformance, compiler verifies nothing | Types with internal locking; confined types satisfying protocol requirements | The #1 AI escape hatch: making the error disappear while shipping the race. Treat as a review-blocking waiver |
+| `@ModelActor` | SwiftData actor with its own `ModelContext` | Bulk/background persistence work | Generating it for apps whose writes are trivially main-actor-sized |
+| `Task { }` | Async work **inheriting** current isolation | Bridging sync → async in the current context (button actions) | Believing it "moves work to the background" — inside `@MainActor` it stays on main |
+| `Task.detached { }` | Async work with **no** inherited isolation/context | Rarely; truly independent work | Using it to "fix" main-thread stalls and capturing non-`Sendable` state across the boundary (Ch 12's data race) |
+| `.defaultIsolation(MainActor.self)` | Swift 6.2: whole module defaults to main actor | App/UI modules under approachable concurrency | The AI can't see build settings — *tell it* which world the module is in, or its annotations will be wrong in either direction |
+
+---
+
+## 6. The Property Wrapper Cheat Sheet (SwiftUI State)
+
+| Wrapper | Owns the value? | Use for | AI failure mode |
+| :--- | :--- | :--- | :--- |
+| `@State` | Yes (view-local) | Ephemeral UI state; owning an `@Observable` object's lifetime | Using it for data that belongs in a ViewModel |
+| `@Binding` | No | Child mutating parent-owned state | Passing bindings three levels deep instead of restructuring |
+| plain `var` (of `@Observable`) | No | **The modern default** for injected ViewModels (iOS 17+) | Wrapping it in `@ObservedObject` (compile error) or `@State` (lifetime bug if injected) |
+| `@Environment` | No | System values; app-wide dependencies (`\.modelContext`) | Reading it in `init` — returns the default value, not the injected one (the Ch 16 crash) |
+| `@Query` | No | SwiftData fetches driving a view directly | Using it inside non-view types; it is a view-layer tool |
+| `@StateObject` / `@ObservedObject` / `@Published` | — | **Legacy** (`ObservableObject` era) | The training-data default: the AI generates these unprompted in new code — per ADR-002, reject on sight |
+| `@AppStorage` | Yes (UserDefaults) | Tiny user preferences (flags, enums) | Using it as a database — queryable domain data belongs in SwiftData (the Ch 14 PR) |
+
+---
+
+## 7. The Instruments Picker Cheat Sheet
+
+The AI can *fix* what the profiler finds; it cannot run the profiler. Symptom → tool, so you start in the right instrument (always on a real, mid-range device):
+
+| Symptom | Instrument / Tool | What you're looking for |
+| :--- | :--- | :--- |
+| Scroll stutter, dropped frames | **Time Profiler** + **Hitches** | Heavy stacks on main thread; hitch time ratio (>5ms/s is user-visible) |
+| Screen is "warm", battery drain | **Time Profiler** (steady state) | Periodic wake-ups: timers ticking whole view trees, polling loops |
+| Whole screen re-rendering | **SwiftUI instrument**; `Self._printChanges()` in DEBUG | Body counts out of proportion to what changed |
+| Memory climbing, never dropping | **Leaks** + **Allocations**; Memory Graph Debugger | Retain cycles (closure → self), caches without limits |
+| Killed in background / jetsam | **Allocations** peak footprint; MetricKit `MXMemoryDiagnostic` | Full-res image decodes, unbounded in-memory stores |
+| Slow launch / watchdog `0x8badf00d` | **App Launch** instrument; MetricKit launch metrics | Main-thread I/O, migrations, sync network in the launch path |
+| Stutter only when images appear | **Time Profiler** (look for `ImageIO` on main) | Decode-at-full-res; missing downsampling (Ch 15's `ArtworkLoader`) |
+| Intermittent data corruption | **Thread Sanitizer** (scheme diagnostic, not Instruments) | Races that strict concurrency hasn't fenced yet (`@unchecked Sendable` zones) |
+| Requests slow / duplicated | **Network instrument**, or Proxyman/Charles | Serial waterfalls that should be parallel; missing dedup (rapid-tap) |
+| Disk churn, slow persistence | **File Activity**; SwiftData/Core Data instrument | Saves per keystroke; fetches in view bodies (the Ch 14 PR) |
+
+---
+
+## 8. The Agentic IDE Cheat Sheet (Cursor/Windsurf)
 
 - **`Cmd+K` (Inline Edit):** Best for localized algorithmic fixes (e.g., *"Refactor this map/filter chain to be O(N)"*).
 - **Composer / Flow:** Best for multi-file generation (e.g., *"Generate a Settings feature based on `@SettingsRFC.md`."*).
@@ -65,7 +117,7 @@ LLMs ship the happy path. Before accepting any generated feature, probe every ro
 
 ---
 
-## 6. The Interview Cheat Sheet
+## 9. The Interview Cheat Sheet
 
 When asked a System Design or Machine Coding question:
 1. **Define Constraints first:** DAU, Offline support, Security.
