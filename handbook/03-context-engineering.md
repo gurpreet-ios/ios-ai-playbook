@@ -97,7 +97,7 @@ The Staff Engineer doesn't write this prompt manually. They orchestrate a system
 > 
 > **Execution Plan:**
 > 1. Generate the implementation.
-> 2. Run the `AI Code Review` prompt against the generated code, specifically checking for race conditions during concurrent disk writes.
+> 2. Run the `AI Code Review` prompt against the generated code, specifically checking for race conditions during concurrent disk writes and duplicate in-flight fetches when several views miss the cache simultaneously (requests must coalesce).
 > 3. Generate unit tests mocking the file system.
 > 4. Summarize the changes in `docs/changelog.md`."
 

@@ -29,8 +29,8 @@ _Last updated: 2026-07-02._
 
 | # | Item | Phase | Priority | Effort |
 | :-- | :-- | :-- | :-- | :-- |
-| 0 | Credibility & staleness fixes (second review pass, 2026-07-02) | 1 | P0 | Small |
-| 1 | Port polished shared chapters from Backend Edition | 1 | P1 | Small |
+| 0 | ✅ ~~Credibility & staleness fixes (second review pass, 2026-07-02)~~ (done 2026-07-02: all sub-bullets verified in tree; App Intents coverage lands with item 3's On-Device AI chapter) | 1 | P0 | Small |
+| 1 | ✅ ~~Port polished shared chapters from Backend Edition~~ (done 2026-07-02: full diff of all 13 shared pairs — the iOS edition is now *ahead* of the backend twins after the Phase-1 polish; one genuine backend-only improvement ported: Ch 3 cache-miss coalescing review clause) | 1 | P1 | Small |
 | 2 | ✅ ~~Running-example spine through Ch 9–16~~ (done 2026-07-02: every chapter has a Running Example section on music-interview-app with a real failure mode; Ch 16 uses the app's actual composition-root crash; new graph-constructing regression test passes on simulator) | 2 | P1 | Large |
 | 3 | New chapters: Verification, CI/CD & Release, Security & Privacy, On-Device AI, Observability, Agentic Security & Cost | 2 | P1 | Large |
 | 4 | ✅ ~~Deepen weakest chapters (Testing, A11y, Cheat Sheets, Breakdowns)~~ (done 2026-07-02: Ch 26 full rewrite w/ tautology audit + new prompt file; Ch 25 end-to-end workflow w/ before/after; Ch 24 three reference tables; 3 breakdowns → full blueprints + README index) | 2 | P1 | Med |
@@ -55,8 +55,8 @@ Found in the 2026-07-02 second review pass. Cheap to fix, expensive to leave in 
 - **Ch 18 promises what the playbooks can't deliver**: the 6-part format (incl. "Ideal Discussion transcript") vs 31–41-line stubs in `interview-playbooks/` (ties into item 6).
 - **Repo hygiene**: stray `site/site/` (accidental 83-byte package-lock.json) — delete; large Phase-1 changeset uncommitted — commit.
 
-### 1. Port polished shared chapters · P1 · Small
-Chapters 1–8, 19–21, 28–29 have near-identical twins in `../backend-playbook-draft/handbook/` that received reference fixes and small improvements (word deltas of +5 to +30 each). Diff each pair, back-port the fixes, re-flavor examples to Swift where the backend version went Go.
+### 1. ✅ Port polished shared chapters · P1 · Small — DONE 2026-07-02
+Diffed all 13 shared pairs (1–8, 19↔17, 20↔18, 21↔19, 28↔20, 29↔21). Finding: after this repo's Phase-1 credibility pass, the iOS edition is **ahead** of the backend twins (5-pillar prompt anatomy, model-landscape appendix references, iOS Loop section — the backend still carries stale model names). Remaining diffs are intentional platform flavoring. One genuine backend-only improvement ported: Ch 3's review clause now also checks cache-miss request coalescing (the backend's thundering-herd check, iOS-flavored). If the Backend Edition is maintained, the port direction is now reversed.
 
 ### 2. ✅ Running-example spine through Ch 9–16 · P1 · Large — DONE 2026-07-02
 All eight chapters gained a "Running Example" section built on `music-interview-app` (introduced as the Part 3 spine in Ch 9), each with real code matching the repo API, a chapter-specific failure mode, and a prompt-that-prevents-it:
