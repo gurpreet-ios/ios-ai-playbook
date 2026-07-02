@@ -69,4 +69,4 @@ LLMs trained before 2024 have very little knowledge of VisionOS. You must use RA
 
 ---
 
-By mastering these system integrations, you elevate your app from a basic utility to a first-class citizen in the Apple ecosystem. In the accompanying `ios/AIPlaybookSampleApp`, we provide runnable examples of how to share state across these tricky process boundaries.
+By mastering these system integrations, you elevate your app from a basic utility to a first-class citizen in the Apple ecosystem. The prompts in this chapter are the pattern: name the process boundary explicitly, and the AI stops generating code that only works inside a single target.

@@ -36,7 +36,7 @@ Before writing a massive feature, you should write an RFC. But you shouldn't wri
 AI agents are generating PRs. AI agents are reviewing PRs. Your PR template must serve both.
 
 A good PR template in the AI era contains a **"Machine Review Checklist"**:
-- [ ] This PR does not violate `adrs/001-swiftdata.md`.
+- [ ] This PR does not violate `adrs/001-swiftdata-over-coredata.md`.
 - [ ] This PR does not introduce un-isolated background threads mutating `@Observable` state.
 - [ ] The AI generated unit tests for the "unhappy path" (network failure, disk full).
 

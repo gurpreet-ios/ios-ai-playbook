@@ -14,7 +14,7 @@ Because AI models are trained on historical data, their default behavior is ofte
 `SwiftData` is Apple's modern, Swift-native macro-based persistence framework, effectively replacing the heavy boilerplate of `CoreData`.
 
 ### Architecture ADR
-> See `adrs/ios-swiftdata-over-coredata.md` (We default to SwiftData for all new projects unless extreme legacy migration is required).
+> See `adrs/001-swiftdata-over-coredata.md` (We default to SwiftData for all new projects unless extreme legacy migration is required).
 
 ### AI Prompting Strategy
 LLMs love to generate `CoreData` XML schemas and `NSManagedObject` subclasses. Stop them.
@@ -28,7 +28,7 @@ LLMs love to generate `CoreData` XML schemas and `NSManagedObject` subclasses. S
 Introduced in iOS 17, the `@Observable` macro replaces the `ObservableObject` protocol and `@Published` properties from the Combine era. It drastically reduces view re-renders by tracking exactly which properties a view reads.
 
 ### Architecture ADR
-> See `adrs/ios-observation-framework.md` (Combine is deprecated for state management; use Observation exclusively).
+> See `adrs/002-observation-over-combine.md` (Combine is superseded for state management; use Observation for all new ViewModels).
 
 ### AI Prompting Strategy
 * **Senior Prompt:** "Generate the ViewModel using the iOS 17 `@Observable` macro. Do not use `ObservableObject`, `@Published`, or `Combine`. Inject dependencies via the initializer."

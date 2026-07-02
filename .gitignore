@@ -28,3 +28,7 @@ Thumbs.db
 # Claude Code session runtime
 .claude/scheduled_tasks.lock
 .claude/*.lock
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate

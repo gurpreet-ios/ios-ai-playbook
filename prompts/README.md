@@ -9,9 +9,8 @@ The library is organized by SDLC phase:
 - `/discovery`: Understanding existing codebases.
 - `/planning`: Breaking down requirements.
 - `/architecture`: Generating interfaces and scaffolding.
-- `/review`: Rigorous code auditing.
+- `/review`: Rigorous code auditing (including the OWASP security audit).
 - `/performance`: Identifying bottlenecks.
-- `/security`: Finding vulnerabilities.
 - `/accessibility`: Ensuring inclusive design.
 - `/refactoring`: Migrating patterns.
 - `/documentation`: Generating specs and notes.

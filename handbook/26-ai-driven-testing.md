@@ -4,7 +4,7 @@
 
 Testing is historically the most neglected part of software development because it requires writing massive amounts of boilerplate (mocks, stubs, spies, setup/teardown methods). AI completely eliminates this bottleneck.
 
-As a Senior AI Engineer, you should use AI to generate 90% of your testing infrastructure, allowing you to focus purely on defining the assertions and edge cases.
+As a Senior AI Engineer, you should use AI to generate the bulk of your testing infrastructure — the mocks, stubs, and setup boilerplate — allowing you to focus purely on defining the assertions and edge cases.
 
 ## The Mock Generation Strategy
 

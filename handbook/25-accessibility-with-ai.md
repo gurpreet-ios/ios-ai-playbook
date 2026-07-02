@@ -1,6 +1,6 @@
 # Chapter 25: Accessibility with AI
 
-> "AI is incredibly fast at generating standard user interfaces. But by default, AI generates interfaces that exclude 15% of the global population. You must explicitly mandate accessibility in your prompts."
+> "AI is incredibly fast at generating standard user interfaces. But by default, AI generates interfaces that exclude the roughly one in six people worldwide who live with a significant disability (WHO estimate). You must explicitly mandate accessibility in your prompts."
 
 Accessibility (A11y) is not an afterthought—it is a fundamental requirement for any production iOS application. However, LLMs (Large Language Models) are heavily biased towards generating "visual only" code. If you ask an LLM to build a custom `AudioPlayer` button using a `ZStack` and some shapes, it will do exactly that, but VoiceOver users will only hear "Image."
 

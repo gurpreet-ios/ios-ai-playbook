@@ -4,7 +4,7 @@
 
 A robust AI engineering pipeline relies on a chain of specialized prompts. Just as you wouldn't use a single massive function to handle networking, UI rendering, and database migrations, you shouldn't use a single prompt to plan, generate, and review code.
 
-Here is a breakdown of the core prompt categories that you should use to build your personal Prompt Systems. (The actual 500+ production prompts can be found in the `prompts/` directory of this playbook).
+Here is a breakdown of the core prompt categories that you should use to build your personal Prompt Systems. (The production prompt library lives in the `prompts/` directory of this playbook and grows with every chapter).
 
 ## 1. Discovery Prompts
 **Goal:** Codebase archaeology and context gathering.

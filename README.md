@@ -1,65 +1,111 @@
-# The Senior AI Engineering Playbook
+# The Senior AI Engineering Playbook — iOS Edition
 
-> The definitive handbook and resource library for AI-native software engineering.
+> A practical handbook for iOS engineers who lead LLMs instead of being led by them: context engineering, prompt systems, and production Swift built the AI-native way.
 
-Welcome to the **AI Engineering Playbook**! This is not just a book about "vibe coding." This is a comprehensive guide to operating like a Senior/Staff Engineer who leads LLMs, masters context engineering, and builds production-grade software using AI natively.
+This is not a book about "vibe coding." It is a working resource for operating like a Senior/Staff iOS engineer in the AI era — where the bottleneck is no longer typing Swift, but defining the problem, engineering the context, and rigorously reviewing what the machine produces.
 
-## Project Vision
+**Primary teaching stack:** Swift 6 (strict concurrency), SwiftUI, the Observation framework, SwiftData, and the agentic IDE workflow (`.cursorrules`, context anchors, prompt systems). Legacy UIKit/Combine appear where real codebases demand them.
 
-The industry is changing incredibly fast. This playbook aims to be the single, definitive resource for anyone preparing to work at top-tier companies (OpenAI, Anthropic, Apple, Stripe, Meta, etc.) or looking to elevate their engineering practice in the age of AI.
+> Looking for the server-side version? The **Backend Edition** (Go/PostgreSQL/Kafka) lives in its own repository.
 
-This repository goes beyond a static PDF. It is a living resource containing:
-- 📚 **The Handbook**: 400-600 pages covering mindset, prompt engineering, context engineering, architecture, and more.
-- 🧠 **Prompt Library**: 500+ categorized, battle-tested, production-ready prompts.
-- 📋 **ADR Repository**: 100+ Architecture Decision Records with real-world examples.
-- 💻 **Sample Projects**: Runnable code for SwiftUI, UIKit, Android, Backend, and Frontend.
-- 🎯 **Interview Playbooks**: 50+ mock interviews, scripts, and flashcards.
+## What's in this repository
 
-## Repository Structure
+| Section | Contents |
+| :-- | :-- |
+| [`handbook/`](handbook/) | The 30-chapter handbook (below) + the dated [Model Landscape appendix](handbook/appendix-model-landscape.md) |
+| [`prompts/`](prompts/README.md) | A starter library of production prompt systems — architecture, review, testing, performance |
+| [`adrs/`](adrs/README.md) | 5 Architecture Decision Records, each usable as an AI context anchor |
+| [`architecture-breakdowns/`](architecture-breakdowns/README.md) | Seed blueprints for deconstructing real products (Uber, Spotify, Instagram) with prompt sequences |
+| [`interview-playbooks/`](interview-playbooks/README.md) | Structured mock interviews (machine coding, architecture, code review) |
+| [`sample-apps/`](sample-apps/) | Three Swift sample apps — a deliberate prompting-strategy trilogy (below) |
+| [`templates/`](templates/) | RFC and PR templates designed for both human and machine reviewers |
+| [`tools/`](tools/) | Book build scripts and a reference MCP server (`doc-mcp-server/`) |
+| [`site/`](site/) | Astro Starlight teaser site — free sample chapters + the paid-PDF funnel (see [`MONETIZATION.md`](MONETIZATION.md)) |
 
-```
-ai-engineering-playbook/
-├── handbook/             # The Senior AI Engineering Handbook (Markdown chapters)
-├── prompts/              # Production prompts (Planning, Review, Architecture, etc.)
-├── adrs/                 # Architecture Decision Records with real examples
-├── design-docs/          # Templates for RFCs, Tech Specs, Runbooks
-├── interview-playbooks/  # Mock interviews, machine coding, system design
-├── ios/                  # iOS specific code and examples
-├── android/              # Android specific code and examples
-├── backend/              # Backend specific code and examples
-├── frontend/             # Frontend specific code and examples
-├── mock-interviews/      # Scripts and walkthroughs for interviews
-├── sample-projects/      # Complete runnable sample applications
-└── tools/                # Scripts, agents, and configuration
-```
+Improvement work is tracked in [`BACKLOG.md`](BACKLOG.md).
 
-## The Handbook Content
+## 🚀 Start here (for beginners)
 
-**PART I: AI Engineering Mindset**
-**PART II: Prompt Engineering (Prompt Systems)**
-**PART III: Context Engineering**
-**PART IV: iOS Engineering**
-**PART V: Architecture**
-**PART VI: ADR Library**
-**PART VII: Code Review**
-**PART VIII: Performance Engineering**
-**PART IX: Debugging**
-**PART X: AI Code Review**
-**PART XI: Documentation**
-**PART XII: Interview Playbook**
-**PART XIII: Real Products**
-**PART XIV: Agentic Engineering**
-**PART XV: Prompt Library**
-**PART XVI: Cheat Sheets**
+New to iOS or overwhelmed by "Actor Isolation" and "Context Windows"? Don't panic — there's a track for you:
 
-## 🚀 Start Here (For Beginners)
+1. **[Chapter 0: The "Hello World" To-Do App](handbook/00-hello-world-todo-tutorial.md)** — build your first SwiftUI app with exactly three prompts.
+2. **[Chapter 17: Fixing Xcode Compiler Errors with AI](handbook/17-xcode-compiler-errors-with-ai.md)** — handle scary compiler errors without letting the AI destroy your architecture.
+3. **[Chapter 27: Prompting for UI/UX](handbook/27-prompting-for-ui-ux.md)** — make your apps look beautiful without memorizing SwiftUI modifiers.
 
-Are you completely new to iOS development or feeling overwhelmed by terms like "Actor Isolation" and "Context Windows"? **Don't panic.**
+## The Handbook
 
-Before diving into the massive architecture chapters or complex sample apps, start here:
+### Part I — The AI-Native Mindset
+- [Chapter 1: The Future Engineer](handbook/01-the-future-engineer.md)
+- [Chapter 2: Vibe Coding](handbook/02-vibe-coding.md)
+- [Chapter 3: Context Engineering](handbook/03-context-engineering.md)
 
-1. **[Chapter 0: The "Hello World" To-Do App](file:///Users/gurpreet029/Documents/antigravity/epic-volta/ai-engineering-playbook/handbook/00-hello-world-todo-tutorial.md)**: A step-by-step tutorial on building your first iOS app using AI prompts, from zero to a working SwiftUI application.
-2. **[Chapter 17: Fixing Xcode Errors with AI](file:///Users/gurpreet029/Documents/antigravity/epic-volta/ai-engineering-playbook/handbook/17-xcode-compiler-errors-with-ai.md)**: Learn how to handle scary compiler errors without letting the AI hallucinate.
-3. **[Chapter 27: Prompting for UI/UX](file:///Users/gurpreet029/Documents/antigravity/epic-volta/ai-engineering-playbook/handbook/27-prompting-for-ui-ux.md)**: How to make your apps look beautiful using AI, without knowing the specific SwiftUI modifiers.
+### Part II — Prompt Systems
+- [Chapter 4: From Prompts to Systems](handbook/04-from-prompts-to-systems.md)
+- [Chapter 5: Core Prompt Categories](handbook/05-core-prompt-categories.md)
 
-Once you have completed Chapter 0, you will be ready to tackle the rest of the playbook!
+### Part III — Managing Agents & Context
+- [Chapter 6: Session Management & State Tracking](handbook/06-session-management.md)
+- [Chapter 7: Memory Compression & Context Anchors](handbook/07-memory-compression.md)
+- [Chapter 8: Prompt Chaining in Practice](handbook/08-prompt-chaining.md)
+
+### Part IV — Architecture
+- [Chapter 9: Presentation Architecture](handbook/09-presentation-architecture.md) (MVVM, MVI, VIPER, TCA)
+- [Chapter 10: System Architecture](handbook/10-system-architecture.md) (Clean, modules, Repository, Coordinator)
+
+### Part V — iOS Engineering
+- [Chapter 11: iOS UI and Architecture](handbook/11-ios-ui-and-architecture.md) (SwiftUI, UIKit, navigation, animation)
+- [Chapter 12: iOS Data and Concurrency](handbook/12-ios-data-and-concurrency.md) (SwiftData, Observation, actors, networking)
+- [Chapter 13: iOS System Integration](handbook/13-ios-system-integration.md) (widgets, Live Activities, push, background tasks)
+
+### Part VI — Quality: Review, Performance, Debugging
+- [Chapter 14: Code Review in the AI Era](handbook/14-code-review.md)
+- [Chapter 15: Performance Engineering](handbook/15-performance-engineering.md)
+- [Chapter 16: Debugging Cookbook](handbook/16-debugging-cookbook.md)
+- [Chapter 17: Fixing Xcode Compiler Errors with AI](handbook/17-xcode-compiler-errors-with-ai.md)
+
+### Part VII — The AI-Native Interview
+- [Chapter 18: Mastering the AI-Native Interview](handbook/18-ai-native-interviews.md)
+
+### Part VIII — Agentic Engineering
+- [Chapter 19: The Agentic IDE](handbook/19-agentic-ide.md)
+- [Chapter 20: Terminal, Browser, and CI Agents](handbook/20-terminal-browser-ci-agents.md)
+- [Chapter 21: Tool Calling & MCP](handbook/21-tool-calling-mcp.md)
+
+### Part IX — Documentation & Reference
+- [Chapter 22: AI-Native Documentation](handbook/22-ai-native-documentation.md)
+- [Chapter 23: System Design Breakdowns](handbook/23-system-design-breakdowns.md)
+- [Chapter 24: Cheat Sheets](handbook/24-cheat-sheets.md)
+
+### Part X — Production Craft
+- [Chapter 25: Accessibility with AI](handbook/25-accessibility-with-ai.md)
+- [Chapter 26: AI-Driven Testing & TDD](handbook/26-ai-driven-testing.md)
+- [Chapter 27: Prompting for UI/UX](handbook/27-prompting-for-ui-ux.md)
+
+### Part XI — AI Systems Engineering
+- [Chapter 28: Agentic AI & RAG Deep Dives](handbook/28-rag-and-custom-agents.md)
+- [Chapter 29: LLM Deployment Architecture](handbook/29-llm-deployment-architecture.md)
+
+### Appendix
+- [The Model Landscape](handbook/appendix-model-landscape.md) — the only place model names live, dated and bumpable.
+
+## The sample apps: a prompting-strategy trilogy
+
+The three apps in [`sample-apps/`](sample-apps/) are **not** three random demos — each was generated with a different prompting strategy, and each keeps the actual prompts next to the code in `_prompts/` directories so you can replay the build:
+
+| App | Strategy | When to use it |
+| :-- | :-- | :-- |
+| [`uber-clone`](sample-apps/uber-clone/) | **Descriptive** — long, constraint-heavy prompts | Complex domains where architectural control matters most |
+| [`spotify-clone`](sample-apps/spotify-clone/) | **Ultra-concise** — fast, authoritative commands | Under time pressure (live machine-coding interviews) |
+| [`music-interview-app`](sample-apps/music-interview-app/) | **Balanced** — upfront `.cursorrules` + short per-file prompts | The recommended default; read its README first |
+
+## How to use this playbook
+
+The through-line is **context engineering**: the [ADRs](adrs/README.md) are not documentation for its own sake — they are the anchors you feed an agent so it writes *your* architecture instead of the internet's average. Every ADR ends with an explicit "AI Anchor Usage" note, and the chapters reference them by path.
+
+**Suggested reading path:**
+1. **Chapters 1–3** — the mindset and the single most important skill, context engineering.
+2. **Chapters 4–8** — turn one-off prompts into repeatable prompt systems.
+3. **Parts IV–VI (9–17)** — the iOS substance: architecture, modern Swift, and the quality gauntlet (review → performance → debugging).
+4. **Parts VIII–XI (19–29)** — scale yourself across IDE, terminal, CI, and custom agents.
+
+Interviewing soon? Jump to [Chapter 18](handbook/18-ai-native-interviews.md), the [interview playbooks](interview-playbooks/README.md), and the sample-app trilogy above.

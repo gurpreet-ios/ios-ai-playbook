@@ -22,7 +22,7 @@ In the AI-native era, the weight has shifted toward **Design, Debugging, and Rev
 
 ## 2. How to Use the Interview Playbook
 
-This repository contains a dedicated `interview-playbooks/` folder with dozens of mock interviews. These are not just "questions and answers." They are structured simulations.
+This repository contains a dedicated `interview-playbooks/` folder with structured mock interviews across three formats (machine coding, architecture, and code review). These are not just "questions and answers." They are structured simulations.
 
 Every mock interview in the playbook follows this format:
 1. **The Prompt:** The ambiguous question the interviewer asks.

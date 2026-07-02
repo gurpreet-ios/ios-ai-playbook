@@ -11,7 +11,7 @@ This is the rapid-fire reference guide for AI-Native Engineering.
 Every senior prompt must contain these 4 elements:
 
 1. **Role:** `You are a Principal iOS Engineer.`
-2. **Context:** `Read @adrs/001-swiftdata.md and @adrs/002-observation.md.`
+2. **Context:** `Read @adrs/001-swiftdata-over-coredata.md and @adrs/002-observation-over-combine.md.`
 3. **Task:** `Implement the ProfileViewModel and ProfileView.`
 4. **Constraint:** `You MUST use @MainActor. Do NOT import UIKit.`
 

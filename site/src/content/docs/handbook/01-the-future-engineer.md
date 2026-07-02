@@ -21,7 +21,7 @@ The traditional software development lifecycle (SDLC) looks like this:
 4. Review Code
 5. Test & Deploy
 
-The AI-native SDLC looks like this:
+As an illustrative model (the exact split varies by team and task), the AI-native SDLC time budget shifts roughly like this:
 1. Gather Requirements
 2. System Design
 3. **Engineer Context (20% of time)**

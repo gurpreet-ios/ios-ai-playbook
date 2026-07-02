@@ -21,7 +21,7 @@ If you ask an LLM to build a new screen without RAG, it will hallucinate a stand
 ### Implementing Basic RAG
 A typical RAG pipeline looks like this:
 1. **Ingestion:** Run a script that chunks all your `.md` and `.swift` files into smaller blocks.
-2. **Embedding:** Convert those text blocks into vector embeddings (arrays of numbers) using an embedding model (like `text-embedding-3-small`).
+2. **Embedding:** Convert those text blocks into vector embeddings (arrays of numbers) using an embedding model (see the [Model Landscape appendix](appendix-model-landscape.md) for current options).
 3. **Storage:** Store these vectors in a Vector Database (like Pinecone, Weaviate, or pgvector).
 4. **Retrieval:** When an engineer asks a question, embed the question, search the Vector DB for the most similar chunks, and inject those chunks into the LLM's system prompt.
 
@@ -30,7 +30,7 @@ A typical RAG pipeline looks like this:
 While RAG provides *knowledge*, Agents provide *action*. An agent is an LLM running in a loop with access to **Tools** (functions it can execute).
 
 ### The Tool-Calling Paradigm
-Modern models (Claude 3.5 Sonnet, GPT-4o) are fine-tuned for tool calling. You provide a JSON schema describing your functions, and the model decides when to call them.
+Modern frontier models are fine-tuned for tool calling. You provide a JSON schema describing your functions, and the model decides when to call them.
 
 **Example Tool: `search_jira`**
 ```json

@@ -9,7 +9,7 @@ There are three primary ways to deploy and consume Large Language Models in prod
 ## 1. Managed Cloud APIs (The Default)
 You send data over the internet to a third-party provider (OpenAI, Anthropic, Google).
 
-* **Examples:** GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro.
+* **Examples:** the frontier models from OpenAI, Anthropic, and Google (see the [Model Landscape appendix](appendix-model-landscape.md) for current names).
 * **Pros:** Highest intelligence, zero infrastructure maintenance, continuous model updates.
 * **Cons:** High latency, extreme data privacy concerns (PII leaving the company network), vendor lock-in.
 
@@ -27,7 +27,7 @@ You deploy a managed model within your company's own cloud perimeter (e.g., AWS,
 ## 3. Local / Self-Hosted Open Source Models
 You download the model weights and run them on your own physical hardware or rented raw GPU instances.
 
-* **Examples:** Meta Llama 3, DeepSeek Coder, Mistral.
+* **Examples:** the open-weight model families from Meta, DeepSeek, Mistral, and others (see the appendix).
 * **Pros:** Absolute data sovereignty. Zero recurring API costs (you only pay for electricity/compute). You can fine-tune the model on your proprietary codebase.
 * **Cons:** You are now responsible for DevOps. Scaling GPU clusters is incredibly difficult. Open-source models currently lag slightly behind the frontier proprietary models in pure reasoning capability.
 
@@ -37,8 +37,8 @@ You download the model weights and run them on your own physical hardware or ren
 
 Senior engineers rarely choose just one. A modern architecture uses a **Hybrid LLM Gateway**.
 
-1. **Routing by Task:** The gateway routes simple tasks (like summarizing a paragraph) to a cheap, fast local model (Llama 3 8B).
+1. **Routing by Task:** The gateway routes simple tasks (like summarizing a paragraph) to a small, cheap open-weight model running locally.
 2. **Routing by Privacy:** The gateway detects PII (Social Security Numbers). If found, it routes the request to the secure VPC model.
-3. **Routing by Complexity:** If the task requires writing a complex SQL migration, it routes to the frontier Cloud API (Claude 3.5 Sonnet).
+3. **Routing by Complexity:** If the task requires writing a complex SQL migration, it routes to a frontier cloud model.
 
 Understanding these deployment topologies is what separates a developer who uses AI from an engineer who architects AI systems.

@@ -11,7 +11,7 @@ This chapter breaks down the mechanics of managing context at an enterprise scal
 ## The Anatomy of Context
 
 ### Context Windows
-The context window is the total amount of text (tokens) an LLM can hold in its working memory at a given moment. While models in 2025 boast million-token windows (like Gemini 1.5 Pro or Claude 3.5 Sonnet), treating the context window as a bottomless garbage can is a critical mistake.
+The context window is the total amount of text (tokens) an LLM can hold in its working memory at a given moment. While frontier models now boast million-token windows (see the [Model Landscape appendix](appendix-model-landscape.md) for current examples), treating the context window as a bottomless garbage can is a critical mistake.
 
 **The "Lost in the Middle" Phenomenon:**
 Even with massive context windows, models suffer from attention degradation. They heavily weight the beginning (system prompts, constraints) and the end (your immediate request) of the context, while information buried in the middle can be ignored. 
