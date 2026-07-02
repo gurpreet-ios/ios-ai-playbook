@@ -20,12 +20,22 @@ The interviewer is testing your ability to handle complex state synchronization,
 > 
 > For receiving messages, I'd use a WebSocket or Server-Sent Events (SSE) connection that writes incoming payloads directly to the local database, which then triggers a reactive UI update via Observation."*
 
-## 5. The Follow-Up
-**Interviewer:** "What happens if a user is offline, sends a message, and at the exact same time, their friend sends them a message. When they come back online, how do you resolve the order of messages in the chat?"
+## 5. Driving the LLM
 
-## 6. The Ideal Discussion
-> *"Relying on client-side timestamps is dangerous because device clocks can drift. I would implement a hybrid ordering system. 
+> **Plan:** "We're designing offline-first chat: local DB as single source of truth, outbox with pending/sent states, WebSocket for incoming. Before code: draw me the module boundaries as a dependency list (UI → ViewModel → Repository → {SwiftData store, SyncEngine}), and state which module owns message ordering. No code yet."
+
+> **Generate (piece 1):** "Define the SwiftData `@Model` for `Message`: local UUID, optional server `sequenceID`, `status` enum (pending/sent/failed), timestamps. Then the `Outbox` actor: `enqueue`, `pendingBatch()`, `markSent(localID:sequenceID:)`. No networking yet."
+
+> **Generate (piece 2):** "Now the `SyncEngine`: drains the outbox with exponential backoff, and applies incoming WebSocket payloads to the store. All writes go through one `ModelActor` — explain how UI updates propagate from there before you write it."
+
+> **Review hook:** "Adversarial pass: the app is force-quit after `enqueue` but before the send completes. Walk me through what happens on next launch, line by line. If the answer is 'the message is lost or duplicated,' fix the design."
+
+**What you're watching for:** the LLM binding the UI to network responses instead of the local store (breaking the local-first invariant), retry loops with no backoff cap, and no idempotency key on sends — the force-quit scenario then double-sends on relaunch.
+
+## 6. The Follow-Up (Mid-Interview Extension)
+**Interviewer:** "Two extensions. First: a user is offline, sends a message, and at the same moment their friend sends them one — when they reconnect, how do you order the chat? Second: product adds *group* chats with 200 members. What breaks in your design?"
+
+## 7. The Ideal Discussion
+> *"Ordering: client timestamps are untrustworthy — clocks drift. The server assigns a strictly monotonic `sequence_id` per conversation. The pending local message renders at the bottom using its local timestamp as a placeholder; when the ack arrives with the official sequence, the list re-sorts. Eventual consistency, and the user never sees their own message jump backward more than once.
 > 
-> The server assigns a strictly monotonic `sequence_id` (or uses Vector Clocks/Lamport Timestamps) to every message it processes. When the client reconnects, it pulls the latest sequence. 
-> 
-> For UI rendering, I will display the `pending` local message at the bottom of the feed using its local timestamp as a placeholder. Once it syncs and receives its official `sequence_id` from the server, the list is re-sorted based on the server's sequence. This ensures eventual consistency across all devices."*
+> Group chats stress two spots. The outbox is fine — sending is still one write. Receiving is not: 200 members means bursts of interleaved messages, so per-message UI updates become 200 view invalidations a second. The fix is batching at the ModelActor boundary — apply WebSocket payloads in transactions and let one save notification re-render the visible window. Read receipts are the real scaling trap: per-member-per-message receipts are O(members × messages) rows. I'd aggregate server-side — 'read up to sequence N per member' — one row per member, and the client renders receipt state by comparing sequence numbers, not by joining a receipts table."*
