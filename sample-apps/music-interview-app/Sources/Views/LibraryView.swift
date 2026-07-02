@@ -14,8 +14,7 @@ public struct LibraryView: View {
                 LazyHStack(spacing: 20) {
                     ForEach(viewModel.tracks) { track in
                         VStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.secondary.opacity(0.2))
+                            TrackArtworkView(title: track.title)
                                 .frame(width: 160, height: 160)
                             
                             Text(track.title)

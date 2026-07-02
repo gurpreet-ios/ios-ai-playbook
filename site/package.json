@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
+    "check:links": "npx --yes linkinator ./dist --recurse --skip \"github.com|example.com|anthropic.com\"",
     "preview": "astro preview",
     "astro": "astro"
   },

@@ -1,16 +1,8 @@
 import Foundation
 
-// MARK: - Location Update
-
-/// A lightweight, decodable model representing a driver's real-time
-/// location update received over a WebSocket connection.
-struct LocationUpdate: Codable, Sendable, Equatable {
-    let driverId: String
-    let latitude: Double
-    let longitude: Double
-    let heading: Double
-    let timestamp: Date
-}
+// NOTE: `LocationUpdate` is defined once, in Models/LocationUpdate.swift.
+// An earlier generation redeclared it here — the classic per-file-prompt
+// integration failure this sample app documents.
 
 // MARK: - WebSocket Connection State
 

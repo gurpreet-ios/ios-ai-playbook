@@ -9,7 +9,7 @@ import SwiftUI
 /// Displays contextual trip information in a translucent card.
 ///
 /// Content adapts automatically based on `TripStatus`:
-/// - `.searching`      → pulsing search animation
+/// - `.requested`      → pulsing search animation
 /// - `.driverAssigned` → driver & vehicle details with ETA
 /// - `.driverArrived`  → arrival notice
 /// - `.inProgress`     → in-progress info with ETA to destination
@@ -55,7 +55,7 @@ private extension TripStatusCard {
     @ViewBuilder
     var statusContent: some View {
         switch tripStatus {
-        case .searching:
+        case .requested:
             searchingContent
 
         case .driverAssigned:
@@ -250,7 +250,7 @@ private extension TripStatusCard {
 #if DEBUG
 #Preview("Searching") {
     TripStatusCard(
-        tripStatus: .searching,
+        tripStatus: .requested,
         driverName: "",
         vehicleInfo: "",
         eta: ""

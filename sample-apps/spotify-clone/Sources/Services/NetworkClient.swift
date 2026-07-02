@@ -4,7 +4,11 @@ public protocol Endpoint: Sendable {
     var request: URLRequest { get }
 }
 
-public actor NetworkClient {
+public protocol NetworkClientProtocol: Sendable {
+    func request<T: Decodable & Sendable>(_ endpoint: Endpoint) async throws -> T
+}
+
+public actor NetworkClient: NetworkClientProtocol {
     private let session: URLSession
     
     public init(session: URLSession = .shared) {

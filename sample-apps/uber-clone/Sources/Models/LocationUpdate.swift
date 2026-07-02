@@ -3,6 +3,7 @@
 // Lightweight value type for real-time driver location telemetry.
 
 import Foundation
+import CoreLocation
 
 // MARK: - LocationUpdate
 
@@ -30,4 +31,11 @@ struct LocationUpdate: Codable, Sendable, Hashable {
 
     /// Wall-clock time when the reading was captured on the device.
     var timestamp: Date
+}
+
+extension LocationUpdate {
+    /// Convenience bridge for MapKit consumers.
+    var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
 }

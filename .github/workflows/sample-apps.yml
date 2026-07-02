@@ -1,0 +1,47 @@
+name: sample-apps
+
+on:
+  push:
+    branches: [main]
+    paths: ['sample-apps/**', '.github/workflows/sample-apps.yml']
+  pull_request:
+    paths: ['sample-apps/**', '.github/workflows/sample-apps.yml']
+
+# Chapter 30's gate 1 applied to the book's own code: all three sample
+# apps must build for the iOS Simulator and pass their Swift Testing
+# suites. The apps are the playbook's proof — a broken sample is a
+# credibility bug, not a code bug.
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: music-interview-app
+            scheme: MusicInterviewApp
+          - app: spotify-clone
+            scheme: SpotifyClone
+          - app: uber-clone
+            scheme: UberClone
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app || sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Pick a simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available --json \
+            | python3 -c "import json,sys; devs=[d for v in json.load(sys.stdin)['devices'].values() for d in v if 'iPhone' in d['name']]; print(devs[-1]['udid'])")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build and test ${{ matrix.app }}
+        working-directory: sample-apps/${{ matrix.app }}
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme ${{ matrix.scheme }} \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            | tail -50

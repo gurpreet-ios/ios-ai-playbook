@@ -41,7 +41,7 @@ final class DriverMapViewModel {
         isLoadingDrivers = true
 
         do {
-            let location = try await locationService.currentLocation()
+            guard let location = await locationService.currentLocation else { return }
             let coordinate = location.coordinate
 
             // Center the map on the user's position
@@ -67,15 +67,12 @@ final class DriverMapViewModel {
     /// Re-centers the map on the user's current location without
     /// reloading the driver list.
     func centerOnUser() async {
-        do {
-            let location = try await locationService.currentLocation()
-            mapRegion = MKCoordinateRegion(
-                center: location.coordinate,
-                span: mapRegion.span  // preserve current zoom level
-            )
-        } catch {
-            // Location unavailable — keep the existing region
-        }
+        // Location unavailable — keep the existing region.
+        guard let location = await locationService.currentLocation else { return }
+        mapRegion = MKCoordinateRegion(
+            center: location.coordinate,
+            span: mapRegion.span  // preserve current zoom level
+        )
     }
 
     /// Selects a driver (e.g. for showing a detail card).

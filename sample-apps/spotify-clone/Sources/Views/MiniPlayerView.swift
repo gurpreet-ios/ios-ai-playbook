@@ -33,7 +33,7 @@ struct MiniPlayerView: View {
                     Spacer()
                     
                     Button {
-                        viewModel.togglePlayback()
+                        Task { await viewModel.togglePlayPause() }
                     } label: {
                         Image(systemName: viewModel.playbackState == .playing ? "pause.fill" : "play.fill")
                             .font(.title2)

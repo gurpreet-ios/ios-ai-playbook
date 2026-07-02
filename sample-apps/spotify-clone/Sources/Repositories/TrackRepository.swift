@@ -3,6 +3,7 @@ import SwiftData
 
 @MainActor
 public protocol TrackRepositoryProtocol: Sendable {
+    func fetchRecentlyPlayed() async throws -> [Track]
     func getTrack(id: UUID) async throws -> Track
     func downloadTrack(id: UUID) async throws
 }
@@ -17,6 +18,14 @@ public final class TrackRepository: TrackRepositoryProtocol {
         self.modelContext = modelContext
     }
     
+    public func fetchRecentlyPlayed() async throws -> [Track] {
+        // Local-first: the home screen renders from the on-device library.
+        // A real app would merge a remote recently-played feed via networkClient.
+        var descriptor = FetchDescriptor<Track>(sortBy: [SortDescriptor(\.title)])
+        descriptor.fetchLimit = 20
+        return try modelContext.fetch(descriptor)
+    }
+
     public func getTrack(id: UUID) async throws -> Track {
         let predicate = #Predicate<Track> { $0.id == id }
         var fetchDescriptor = FetchDescriptor<Track>(predicate: predicate)

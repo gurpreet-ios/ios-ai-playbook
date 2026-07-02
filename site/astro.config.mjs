@@ -7,7 +7,8 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'The Senior AI Engineering Playbook',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			// Add a `social` entry pointing at the real repository once it has
+			// a public home — the previous value was the Starlight placeholder.
 			sidebar: [
 				{ label: 'Get the book', link: '/pricing/' },
 				{

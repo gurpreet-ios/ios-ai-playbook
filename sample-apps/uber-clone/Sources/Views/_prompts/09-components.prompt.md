@@ -29,7 +29,7 @@ You are a Senior iOS Engineer writing production SwiftUI components for an Uber 
 > - **Inputs**: `tripStatus: TripStatus`, `driverName: String`, `vehicleInfo: String`, `eta: String`.
 > - **Background**: `.ultraThinMaterial` with `cornerRadius: 20` and a subtle shadow.
 > - **Status-dependent content**:
->   - `.searching` — pulsing magnifying-glass animation (`repeatForever`).
+>   - `.requested` — pulsing magnifying-glass animation ("finding your driver") (`repeatForever`).
 >   - `.driverAssigned` — driver info row + "Arriving in" ETA.
 >   - `.driverArrived` — driver info + "Meet at the pickup point".
 >   - `.inProgress` — driver info + ETA + progress bar.

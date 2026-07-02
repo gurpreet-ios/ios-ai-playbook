@@ -21,13 +21,16 @@ public final class PlayerViewModel {
         }
     }
     
-    deinit {
+    /// Explicit cleanup: `deinit` is nonisolated and cannot touch
+    /// main-actor state, so the owner calls this instead.
+    public func cleanup() {
         stateObservationTask?.cancel()
+        stateObservationTask = nil
     }
-    
+
     public func play(track: Track) async {
         currentTrack = track
-        await audioEngine.play(track: track)
+        await audioEngine.play(url: track.offlineFileURL ?? track.streamURL)
     }
     
     public func togglePlayPause() async {

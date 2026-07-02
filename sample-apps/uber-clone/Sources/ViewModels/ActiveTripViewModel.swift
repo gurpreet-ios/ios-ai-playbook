@@ -16,16 +16,33 @@ final class ActiveTripViewModel {
     // MARK: Published State
 
     var trip: Trip?
-    var driverLocation: CLLocationCoordinate2D?
-    var driverHeading: Double = 0.0
-    var estimatedArrival: String = "--"
+    var driverLocation: LocationUpdate?
+    var cameraPosition: MapCameraPosition = .automatic
+    var route: MKRoute?
     var tripStatus: TripStatus = .requested
-    var showCancelConfirmation: Bool = false
+    var driverName: String = "--"
+    var vehicleInfo: String = "--"
+    var eta: String = "--"
+
+    // MARK: Derived State
+
+    var pickupCoordinate: CLLocationCoordinate2D? {
+        trip.map { CLLocationCoordinate2D(latitude: $0.pickupLatitude, longitude: $0.pickupLongitude) }
+    }
+
+    var dropoffCoordinate: CLLocationCoordinate2D? {
+        trip.map { CLLocationCoordinate2D(latitude: $0.dropoffLatitude, longitude: $0.dropoffLongitude) }
+    }
+
+    /// Cancellation is only offered before the ride is underway.
+    var canCancel: Bool {
+        tripStatus == .driverAssigned || tripStatus == .driverArrived
+    }
 
     // MARK: Dependencies
 
-    private let tripRepository: TripRepositoryProtocol
-    private let driverRepository: DriverRepositoryProtocol
+    private let tripRepository: any TripRepositoryProtocol
+    private let driverRepository: any DriverRepositoryProtocol
 
     // MARK: Task Management
 
@@ -35,58 +52,46 @@ final class ActiveTripViewModel {
 
     // MARK: Init
 
-    init(tripRepository: TripRepositoryProtocol, driverRepository: DriverRepositoryProtocol) {
+    init(tripRepository: any TripRepositoryProtocol, driverRepository: any DriverRepositoryProtocol) {
         self.tripRepository = tripRepository
         self.driverRepository = driverRepository
     }
 
     // MARK: - Public Methods
 
-    /// Loads the user's currently active trip from the repository
-    /// and begins tracking the assigned driver (if any).
-    func loadActiveTrip() async {
+    /// Entry point for the view's `.task`: loads the active trip and
+    /// begins tracking the assigned driver (if any).
+    func startTracking() async {
         do {
-            let activeTrip = try await tripRepository.fetchActiveTrip()
+            guard let activeTrip = try await tripRepository.fetchActiveTrip() else { return }
             trip = activeTrip
             tripStatus = activeTrip.status
 
             if let driverId = activeTrip.driverId {
-                await startTrackingDriver(driverId: driverId)
+                let driver = try await driverRepository.getDriver(id: driverId)
+                driverName = driver.name
+                vehicleInfo = "\(driver.vehicleMake) \(driver.vehicleModel) · \(driver.licensePlate)"
+                startTrackingDriver(driverId: driverId)
             }
         } catch is CancellationError {
-            // Swallow cancellation silently
+            // Expected when the view disappears mid-load.
         } catch {
-            tripStatus = .cancelled
+            // Non-fatal: the UI keeps its last-known state.
         }
     }
 
-    /// Starts a long-running task that streams location updates
-    /// for the given driver. Any previously running tracking task
-    /// is cancelled first to avoid duplicates.
-    func startTrackingDriver(driverId: UUID) async {
-        // Cancel any existing tracking before starting a new one
+    /// Starts a long-running task that streams location updates for the
+    /// given driver. Any previous tracking task is cancelled first.
+    func startTrackingDriver(driverId: UUID) {
         stopTracking()
 
         trackingTask = Task { [weak self] in
             guard let self else { return }
 
-            do {
-                let stream = try await self.driverRepository.streamDriverLocation(driverId: driverId)
-
-                for await update in stream {
-                    // Bail out immediately if the task was cancelled
-                    guard !Task.isCancelled else { break }
-
-                    self.driverLocation = update.coordinate
-                    self.driverHeading = update.heading
-                    self.estimatedArrival = update.formattedETA
-                    self.tripStatus = update.tripStatus
-                }
-            } catch is CancellationError {
-                // Expected when stopTracking() is called
-            } catch {
-                // Non-fatal — the UI will show stale data until
-                // the next successful update.
+            let stream = self.driverRepository.streamDriverLocation(driverId: driverId)
+            for await update in stream {
+                guard !Task.isCancelled else { break }
+                self.driverLocation = update
             }
         }
     }
@@ -101,7 +106,7 @@ final class ActiveTripViewModel {
             trip = nil
             stopTracking()
         } catch {
-            // Surface error — the trip was not cancelled server-side
+            // The trip was not cancelled server-side — restore the status.
             tripStatus = trip?.status ?? .requested
         }
     }
@@ -113,3 +118,67 @@ final class ActiveTripViewModel {
         trackingTask = nil
     }
 }
+
+// MARK: - Preview Support
+
+#if DEBUG
+/// Stub repositories shared by the SwiftUI previews.
+struct PreviewTripRepository: TripRepositoryProtocol {
+    func requestTrip(
+        from pickup: CLLocationCoordinate2D,
+        to dropoff: CLLocationCoordinate2D,
+        pickupAddress: String,
+        dropoffAddress: String
+    ) async throws -> TripResponseDTO {
+        TripResponseDTO(tripId: UUID(), estimatedFare: 18.50, estimatedArrivalMinutes: 4)
+    }
+
+    func cancelTrip(tripId: UUID) async throws {}
+
+    func fetchActiveTrip() async throws -> Trip? {
+        Trip(
+            riderId: UUID(),
+            driverId: UUID(),
+            status: .driverAssigned,
+            pickupLatitude: 37.7749,
+            pickupLongitude: -122.4194,
+            dropoffLatitude: 37.7849,
+            dropoffLongitude: -122.4094
+        )
+    }
+
+    func estimateFare(
+        from pickup: CLLocationCoordinate2D,
+        to dropoff: CLLocationCoordinate2D
+    ) async throws -> FareEstimateDTO {
+        FareEstimateDTO(baseFare: 3.0, distanceFare: 10.0, timeFare: 5.5, totalFare: 18.5, currency: "USD")
+    }
+}
+
+struct PreviewDriverRepository: DriverRepositoryProtocol {
+    func fetchNearbyDrivers(latitude: Double, longitude: Double) async throws -> [Driver] { [] }
+
+    func getDriver(id: UUID) async throws -> Driver {
+        Driver(
+            id: id,
+            name: "Alex Johnson",
+            vehicleMake: "Tesla",
+            vehicleModel: "Model 3",
+            licensePlate: "4RKT 829"
+        )
+    }
+
+    func streamDriverLocation(driverId: UUID) -> AsyncStream<LocationUpdate> {
+        AsyncStream { $0.finish() }
+    }
+}
+
+extension ActiveTripViewModel {
+    static var preview: ActiveTripViewModel {
+        ActiveTripViewModel(
+            tripRepository: PreviewTripRepository(),
+            driverRepository: PreviewDriverRepository()
+        )
+    }
+}
+#endif

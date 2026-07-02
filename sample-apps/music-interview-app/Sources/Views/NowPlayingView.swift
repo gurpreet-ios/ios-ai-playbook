@@ -12,14 +12,11 @@ public struct NowPlayingView: View {
         VStack(spacing: 40) {
             Spacer()
             
-            // Album Art Placeholder
-            RoundedRectangle(cornerRadius: 24)
-                .fill(Color.secondary.opacity(0.2))
+            // Album Art
+            TrackArtworkView(title: viewModel.currentTrack?.title, cornerRadius: 24)
                 .aspectRatio(1.0, contentMode: .fit)
                 .padding(.horizontal, 40)
                 .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-                .accessibilityLabel(viewModel.currentTrack.map { "Album Art for \($0.title)" } ?? "No Album Art")
-                .accessibilityAddTraits(.isImage)
             
             VStack(spacing: 8) {
                 Text(viewModel.currentTrack?.title ?? "Not Playing")

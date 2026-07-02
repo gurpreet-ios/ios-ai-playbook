@@ -1,1 +1,1 @@
-Generate TrackRepository protocol and @MainActor impl. Inject NetworkClient. downloadTrack updates SwiftData model offlineFileURL and isDownloaded.
+Generate TrackRepository protocol and @MainActor impl. Inject NetworkClientProtocol + ModelContext. Methods: fetchRecentlyPlayed (local-first FetchDescriptor, limit 20), getTrack(id:), downloadTrack — updates SwiftData model offlineFileURL and isDownloaded.

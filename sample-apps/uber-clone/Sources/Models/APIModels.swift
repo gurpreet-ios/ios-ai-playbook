@@ -37,6 +37,40 @@ struct TripResponseDTO: Codable, Sendable, Hashable {
     var estimatedArrivalMinutes: Int
 }
 
+// MARK: - DriverDTO
+
+/// Inbound payload describing a driver. Mapped to the `Driver` @Model by
+/// the repository layer — SwiftData models never cross the network boundary.
+struct DriverDTO: Codable, Sendable, Hashable {
+    var id: UUID
+    var name: String
+    var vehicleMake: String
+    var vehicleModel: String
+    var licensePlate: String
+    var rating: Double
+    var isAvailable: Bool
+    var currentLatitude: Double
+    var currentLongitude: Double
+}
+
+// MARK: - TripDTO
+
+/// Inbound payload describing a trip. Mapped to the `Trip` @Model by
+/// the repository layer.
+struct TripDTO: Codable, Sendable, Hashable {
+    var id: UUID
+    var riderId: UUID
+    var driverId: UUID?
+    var status: TripStatus
+    var pickupLatitude: Double
+    var pickupLongitude: Double
+    var dropoffLatitude: Double
+    var dropoffLongitude: Double
+    var requestedAt: Date
+    var completedAt: Date?
+    var fare: Double?
+}
+
 // MARK: - FareEstimateDTO
 
 /// Breakdown of a fare estimate returned before the rider confirms a trip.

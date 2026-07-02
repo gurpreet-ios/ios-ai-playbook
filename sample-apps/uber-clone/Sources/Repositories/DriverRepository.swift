@@ -12,22 +12,19 @@ import Foundation
 
 /// All driver-related data operations.
 /// ViewModels depend on this protocol — never on networking types directly.
+@MainActor
 protocol DriverRepositoryProtocol: Sendable {
 
-    /// Fetch drivers near a coordinate within a given radius.
-    func getNearbyDrivers(
-        latitude: Double,
-        longitude: Double,
-        radiusKm: Double
-    ) async throws -> [Driver]
+    /// Fetch drivers near a coordinate. The search radius is a repository
+    /// policy, not a caller concern.
+    func fetchNearbyDrivers(latitude: Double, longitude: Double) async throws -> [Driver]
 
     /// Fetch a single driver by identifier.
     func getDriver(id: UUID) async throws -> Driver
 
     /// Open a real-time stream of location updates for a specific driver.
-    /// The returned `AsyncStream` emits `LocationUpdate` values until the
-    /// WebSocket connection is closed or the driver goes offline.
-    func trackDriver(id: UUID) -> AsyncStream<LocationUpdate>
+    /// The stream emits until the WebSocket closes or the consumer cancels.
+    func streamDriverLocation(driverId: UUID) -> AsyncStream<LocationUpdate>
 }
 
 // MARK: - Implementation
@@ -42,6 +39,9 @@ final class DriverRepository: DriverRepositoryProtocol {
     private let networkClient: NetworkClient
     private let webSocketManager: WebSocketManager
 
+    /// Default nearby-search radius in kilometres.
+    private let searchRadiusKm: Double = 5.0
+
     // MARK: - Init
 
     init(networkClient: NetworkClient, webSocketManager: WebSocketManager) {
@@ -51,52 +51,37 @@ final class DriverRepository: DriverRepositoryProtocol {
 
     // MARK: - DriverRepositoryProtocol
 
-    func getNearbyDrivers(
-        latitude: Double,
-        longitude: Double,
-        radiusKm: Double
-    ) async throws -> [Driver] {
-
-        let queryItems = [
-            "lat": "\(latitude)",
-            "lng": "\(longitude)",
-            "radiusKm": "\(radiusKm)"
-        ]
-
+    func fetchNearbyDrivers(latitude: Double, longitude: Double) async throws -> [Driver] {
         let endpoint = Endpoint(
             path: "/api/v1/drivers/nearby",
             method: .get,
-            queryItems: queryItems,
-            body: nil
+            queryItems: [
+                URLQueryItem(name: "lat", value: "\(latitude)"),
+                URLQueryItem(name: "lng", value: "\(longitude)"),
+                URLQueryItem(name: "radiusKm", value: "\(searchRadiusKm)"),
+            ]
         )
 
-        let drivers: [Driver] = try await networkClient.request(endpoint)
-        return drivers
+        // DTOs cross the network boundary; @Model types never do.
+        let dtos: [DriverDTO] = try await networkClient.request(endpoint)
+        return dtos.map(Self.makeDriver)
     }
 
     func getDriver(id: UUID) async throws -> Driver {
-        let endpoint = Endpoint(
-            path: "/api/v1/drivers/\(id.uuidString)",
-            method: .get,
-            body: nil
-        )
-
-        let driver: Driver = try await networkClient.request(endpoint)
-        return driver
+        let endpoint = Endpoint(path: "/api/v1/drivers/\(id.uuidString)")
+        let dto: DriverDTO = try await networkClient.request(endpoint)
+        return Self.makeDriver(from: dto)
     }
 
-    func trackDriver(id: UUID) -> AsyncStream<LocationUpdate> {
-        // Delegate to WebSocketManager and filter for the target driver.
-        let upstream: AsyncStream<LocationUpdate> = webSocketManager
-            .locationUpdates(forChannel: "driver:\(id.uuidString)")
+    func streamDriverLocation(driverId: UUID) -> AsyncStream<LocationUpdate> {
+        // The socket vends one firehose stream; filter it for the target
+        // driver. (Single-consumer: one active tracking screen at a time.)
+        let upstream = webSocketManager.locationUpdates
 
         return AsyncStream<LocationUpdate> { continuation in
-            let task = Task { [upstream] in
-                for await update in upstream {
-                    // Only yield updates that match the requested driver.
-                    if update.driverId == id {
-                        continuation.yield(update)
-                    }
+            let task = Task {
+                for await update in upstream where update.driverId == driverId {
+                    continuation.yield(update)
                 }
                 continuation.finish()
             }
@@ -106,13 +91,20 @@ final class DriverRepository: DriverRepositoryProtocol {
             }
         }
     }
-}
 
-// MARK: - WebSocketManager Protocol
+    // MARK: - Mapping
 
-/// Minimal contract for a WebSocket transport.
-/// The Services layer provides the concrete implementation.
-protocol WebSocketManager: Sendable {
-    /// Returns an `AsyncStream` of location updates for the given channel key.
-    func locationUpdates(forChannel channel: String) -> AsyncStream<LocationUpdate>
+    private static func makeDriver(from dto: DriverDTO) -> Driver {
+        Driver(
+            id: dto.id,
+            name: dto.name,
+            vehicleMake: dto.vehicleMake,
+            vehicleModel: dto.vehicleModel,
+            licensePlate: dto.licensePlate,
+            rating: dto.rating,
+            isAvailable: dto.isAvailable,
+            currentLatitude: dto.currentLatitude,
+            currentLongitude: dto.currentLongitude
+        )
+    }
 }

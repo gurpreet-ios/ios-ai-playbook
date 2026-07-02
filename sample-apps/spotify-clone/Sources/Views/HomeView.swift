@@ -47,7 +47,7 @@ struct HomeView: View {
             }
             .navigationTitle("Home")
             .task {
-                await viewModel.loadRecentlyPlayed()
+                await viewModel.loadHome()
             }
         }
     }

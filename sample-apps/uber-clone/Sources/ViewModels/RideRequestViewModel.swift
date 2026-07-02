@@ -15,51 +15,58 @@ final class RideRequestViewModel {
 
     // MARK: Published State
 
-    var pickupAddress: String = ""
-    var dropoffAddress: String = ""
+    var pickupText: String = ""
+    var dropoffText: String = ""
     var pickupCoordinate: CLLocationCoordinate2D?
     var dropoffCoordinate: CLLocationCoordinate2D?
-    var fareEstimate: FareEstimateDTO?
+    var route: MKRoute?
+    var cameraPosition: MapCameraPosition = .automatic
+    /// Formatted fare string ready for display, or `nil` before estimation.
+    var fareEstimate: String?
     var isLoading: Bool = false
     var errorMessage: String?
-    var currentUserLocation: CLLocationCoordinate2D?
+
+    // MARK: Derived State
+
+    var canRequestRide: Bool {
+        pickupCoordinate != nil && dropoffCoordinate != nil && !isLoading
+    }
 
     // MARK: Dependencies (protocol-based)
 
-    private let tripRepository: TripRepositoryProtocol
+    private let tripRepository: any TripRepositoryProtocol
     private let locationService: LocationService
 
     // MARK: Init
 
-    init(tripRepository: TripRepositoryProtocol, locationService: LocationService) {
+    init(tripRepository: any TripRepositoryProtocol, locationService: LocationService) {
         self.tripRepository = tripRepository
         self.locationService = locationService
     }
 
     // MARK: - Public Methods
 
-    /// Retrieves the device's current location via `LocationService` and
-    /// assigns it as the pickup coordinate.
-    func fetchCurrentLocation() async {
-        isLoading = true
-        errorMessage = nil
+    /// Entry point for the view's `.task`: starts location tracking and
+    /// centers the map on the first fix, using it as the default pickup.
+    func onAppear() async {
+        await locationService.startTracking()
 
-        do {
-            let location = try await locationService.currentLocation()
-            currentUserLocation = location.coordinate
-            pickupCoordinate = location.coordinate
-        } catch {
-            errorMessage = "Unable to determine your location: \(error.localizedDescription)"
+        for await location in locationService.locations {
+            let coordinate = location.coordinate
+            pickupCoordinate = coordinate
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+                )
+            )
+            break // First fix is enough to anchor the screen.
         }
-
-        isLoading = false
     }
 
-    /// Calls the trip repository to fetch an estimated fare for the
-    /// current pickup → dropoff route.
+    /// Fetches an estimated fare for the current pickup → dropoff pair.
     func estimateFare() async {
-        guard let pickup = pickupCoordinate,
-              let dropoff = dropoffCoordinate else {
+        guard let pickup = pickupCoordinate, let dropoff = dropoffCoordinate else {
             errorMessage = "Please set both pickup and dropoff locations."
             return
         }
@@ -68,13 +75,10 @@ final class RideRequestViewModel {
         errorMessage = nil
 
         do {
-            let estimate = try await tripRepository.estimateFare(
-                from: pickup,
-                to: dropoff
-            )
-            fareEstimate = estimate
+            let estimate = try await tripRepository.estimateFare(from: pickup, to: dropoff)
+            fareEstimate = String(format: "%.2f %@", estimate.totalFare, estimate.currency)
         } catch is CancellationError {
-            // Task was cancelled — don't surface as an error
+            // Task was cancelled — don't surface as an error.
         } catch {
             errorMessage = "Fare estimate failed: \(error.localizedDescription)"
         }
@@ -82,13 +86,12 @@ final class RideRequestViewModel {
         isLoading = false
     }
 
-    /// Requests a new ride and returns the server response DTO.
-    /// - Throws: Re-throws repository errors so the caller can
-    ///   decide how to handle them (e.g. navigate or show alert).
-    func requestRide() async throws -> TripResponseDTO {
-        guard let pickup = pickupCoordinate,
-              let dropoff = dropoffCoordinate else {
-            throw RideRequestError.missingLocations
+    /// Requests a new ride. Errors surface through `errorMessage` so the
+    /// view can stay a plain `Task { await … }` call site.
+    func requestRide() async {
+        guard let pickup = pickupCoordinate, let dropoff = dropoffCoordinate else {
+            errorMessage = "Both pickup and dropoff locations are required."
+            return
         }
 
         isLoading = true
@@ -98,28 +101,29 @@ final class RideRequestViewModel {
             let response = try await tripRepository.requestTrip(
                 from: pickup,
                 to: dropoff,
-                pickupAddress: pickupAddress,
-                dropoffAddress: dropoffAddress
+                pickupAddress: pickupText,
+                dropoffAddress: dropoffText
             )
-            isLoading = false
-            return response
+            fareEstimate = String(format: "$%.2f", response.estimatedFare)
+        } catch is CancellationError {
+            // View disappeared mid-request.
         } catch {
-            isLoading = false
             errorMessage = "Ride request failed: \(error.localizedDescription)"
-            throw error
         }
+
+        isLoading = false
     }
 }
 
-// MARK: - RideRequestError
+// MARK: - Preview Support
 
-enum RideRequestError: LocalizedError {
-    case missingLocations
-
-    var errorDescription: String? {
-        switch self {
-        case .missingLocations:
-            return "Both pickup and dropoff locations are required."
-        }
+#if DEBUG
+extension RideRequestViewModel {
+    static var preview: RideRequestViewModel {
+        RideRequestViewModel(
+            tripRepository: PreviewTripRepository(),
+            locationService: LocationService()
+        )
     }
 }
+#endif

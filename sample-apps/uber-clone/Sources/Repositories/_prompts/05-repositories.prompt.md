@@ -46,30 +46,30 @@ exist in the same Swift module:
 
 Create:
 - `TripRepositoryProtocol` (Sendable) with methods:
-    • requestTrip(pickupLat:pickupLng:dropoffLat:dropoffLng:) async throws -> TripResponseDTO
+    • requestTrip(from:to:pickupAddress:dropoffAddress:) async throws -> TripResponseDTO
     • cancelTrip(tripId: UUID) async throws
-    • getActiveTrip() async throws -> Trip?
-    • getFareEstimate(pickupLat:pickupLng:dropoffLat:dropoffLng:) async throws -> FareEstimateDTO
+    • fetchActiveTrip() async throws -> Trip?
+    • estimateFare(from:to:) async throws -> FareEstimateDTO
 - `TripRepository` class conforming to the protocol:
     • Inject `NetworkClient` via init.
     • Mark with `@MainActor` (it updates SwiftData).
     • Use the `Endpoint` struct to construct each API call.
     • For `cancelTrip`, fire a PUT to `/api/v1/trips/{id}/cancel`.
-    • For `getActiveTrip`, return `nil` when the server responds 404.
-    • For `getFareEstimate`, pass coordinates as query items on a GET.
+    • For `fetchActiveTrip`, return `nil` when the server responds 404.
+    • For `estimateFare`, pass coordinates as query items on a GET.
 
 ### File 2 — DriverRepository.swift
 
 Create:
 - `DriverRepositoryProtocol` (Sendable) with methods:
-    • getNearbyDrivers(latitude:longitude:radiusKm:) async throws -> [Driver]
+    • fetchNearbyDrivers(latitude:longitude:)  # radius is repository policy async throws -> [Driver]
     • getDriver(id: UUID) async throws -> Driver
-    • trackDriver(id: UUID) -> AsyncStream<LocationUpdate>
+    • streamDriverLocation(driverId: UUID) -> AsyncStream<LocationUpdate>
 - `DriverRepository` class conforming to the protocol:
     • Inject `NetworkClient` AND `WebSocketManager` via init.
-    • `getNearbyDrivers` builds a GET endpoint with query items.
+    • `fetchNearbyDrivers` builds a GET endpoint with query items.
     • `getDriver` builds a GET endpoint with the driver ID in the path.
-    • `trackDriver` delegates to `WebSocketManager.locationUpdates(forChannel:)`,
+    • `streamDriverLocation` consumes `WebSocketManager.locationUpdates` filtered by driver,
       wrapping in an `AsyncStream` that filters updates by `driverId`.
 - `WebSocketManager` protocol (Sendable) with:
     • `locationUpdates(forChannel:) -> AsyncStream<LocationUpdate>`
@@ -102,7 +102,7 @@ Before merging, verify each item:
 | 6 | Neither file imports `SwiftUI` | ☐ |
 | 7 | No ViewModel references appear anywhere in the layer | ☐ |
 | 8 | `AsyncStream` usage includes `onTermination` to cancel the backing `Task` | ☐ |
-| 9 | `NetworkError` cases cover 404 → `nil` conversion in `getActiveTrip` | ☐ |
+| 9 | `NetworkError` cases cover 404 → `nil` conversion in `fetchActiveTrip` | ☐ |
 | 10 | Files compile in the flat `Sources/` target with no Xcode project | ☐ |
 
 ---
