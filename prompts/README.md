@@ -4,6 +4,8 @@ This directory contains production-ready Prompt Systems. These are not casual co
 
 Two invariants hold across the library: **every prompt referenced by a chapter exists here**, and **every prompt here is taught by a chapter** (the Chapter column below). If you add a prompt, wire it into the chapter that teaches its skill.
 
+Eight of the highest-leverage prompts also ship as installable **Agent Skills** in [`skills/`](../skills/README.md) — same workflows, packaged in the `SKILL.md` format so the agent triggers them itself. Chapter 19c teaches the conversion.
+
 ## Anatomy of a Production Prompt
 
 Every prompt follows the same format (Chapter 4's pillars, operationalized):
@@ -63,6 +65,7 @@ Every prompt follows the same format (Chapter 4's pillars, operationalized):
 ### `/debugging` — hypothesis discipline
 | Prompt | Does | Chapter |
 | :-- | :-- | :-- |
+| [codebase-orientation](debugging/codebase-orientation.md) | The mental model of unfamiliar territory before any symptom-chasing | 16, 18 |
 | [codebase-mapping](debugging/codebase-mapping.md) | The neutral map before any hypothesis | 16 |
 | [hypothesis-first-debug](debugging/hypothesis-first-debug.md) | Ranked hypotheses + anti-sycophancy hook | 16 |
 | [crash-triage](debugging/crash-triage.md) | Classify termination before hypothesizing | 33 |

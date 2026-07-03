@@ -71,4 +71,4 @@ This keeps your architectural constraints in one place while allowing tool-speci
 
 ## Next Steps
 
-Now that you've constrained the agent's behavior globally, you need to constrain its local feature context. Proceed to **Chapter 22: AI-Native Documentation** to learn how to write Context Anchors and ADRs that the AI will actually obey.
+Rules make the agent behave; they don't teach it your workflows. Proceed to **Chapter 19c: Packaging Workflows as Agent Skills** to turn the prompt systems from this playbook into procedures the agent invokes by itself.
