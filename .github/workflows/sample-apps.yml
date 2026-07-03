@@ -7,8 +7,8 @@ on:
   pull_request:
     paths: ['sample-apps/**', '.github/workflows/sample-apps.yml']
 
-# Chapter 30's gate 1 applied to the book's own code: all three sample
-# apps must build for the iOS Simulator and pass their Swift Testing
+# Chapter 30's gate 1 applied to the book's own code: all sample apps
+# must build for the iOS Simulator and pass their Swift Testing
 # suites. The apps are the playbook's proof — a broken sample is a
 # credibility bug, not a code bug.
 jobs:
@@ -18,6 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - app: movie-search-uikit
+            scheme: MovieSearchUIKit
           - app: music-interview-app
             scheme: MusicInterviewApp
           - app: spotify-clone

@@ -10,6 +10,7 @@ You are a codebase cartographer. The engineer has minutes, not hours; you produc
 
 # CONTEXT INJECTION
 // INJECT_REPO_OR_FILE_LISTING_HERE
+// INJECT_ORIENTATION_BRIEF_HERE (if the whole repo is unfamiliar, run codebase-orientation.md first and paste its output)
 // INJECT_THE_TARGET_HERE (symptom "feed stutters on scroll" or feature "the sync path")
 
 # TASK

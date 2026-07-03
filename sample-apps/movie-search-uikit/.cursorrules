@@ -1,0 +1,45 @@
+# Movie Search App — Global Architecture Rules
+
+You are an expert iOS Engineer assisting with a 1-hour machine coding interview. We are building a Movie Search app (search → results list → detail → favorites) on UIKit.
+You MUST adhere to the following architectural decisions that I have agreed upon with the interviewer:
+
+## 1. UI Framework (UIKit, programmatic)
+
+- UIKit only. No SwiftUI, no storyboards, no XIBs.
+- Auto Layout via layout anchors; `translatesAutoresizingMaskIntoConstraints = false` everywhere.
+- Lists use `UICollectionView` with compositional list layout and a **diffable data source**. Never `reloadData()`.
+
+## 2. Architecture (MVVM-C)
+
+- **ViewControllers are dumb renderers.** They bind to the ViewModel, render state, and forward user events. They never navigate, never touch a repository, never build another ViewController.
+- **ViewModels own all state and logic.** They are `@MainActor` classes exposing state through `Box<Value>`.
+- **Coordinators own all navigation.** Screen creation and `pushViewController` happen only inside a Coordinator. ViewModels signal navigation intent through closures (e.g. `onMovieSelected`).
+
+## 3. Concurrency (Swift 6)
+
+- Strict `async/await`. No GCD, no `DispatchQueue`, no completion handlers.
+- Services (`NetworkClient`, `ImageLoader`) are `actor` types.
+- Everything that touches UIKit is `@MainActor`.
+- All types crossing an actor boundary must be `Sendable`.
+
+## 4. Binding
+
+- MVVM binding uses the closure-based `Box<Value>` observable. Do NOT use Combine, RxSwift, `@Observable`, KVO, or NotificationCenter.
+
+## 5. Dependency Injection
+
+- Protocol-based DI through initializers only (e.g. `MovieRepositoryProtocol`, `ImageLoading`).
+- One composition root: `AppDependencies`. No singletons, no service locators.
+
+## 6. Persistence
+
+- Favorites are movie IDs in `UserDefaults` behind `FavoritesStoreProtocol`. No CoreData, no SwiftData — out of scope for the time-box.
+
+## 7. Dependencies
+
+- Zero third-party libraries. Image loading is a hand-rolled `NSCache`-backed actor.
+
+## 8. Accessibility
+
+- Every custom control gets an `accessibilityLabel` (and `accessibilityHint` where the action is non-obvious).
+- Dynamic Type via `UIFont.preferredFont(forTextStyle:)` and `adjustsFontForContentSizeCategory = true`. Never hardcode font sizes.
