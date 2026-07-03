@@ -7,14 +7,15 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'The Senior AI Engineering Playbook',
-			// Add a `social` entry pointing at the real repository once it has
-			// a public home — the previous value was the Starlight placeholder.
+			social: [
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/gurpreet-ios/ios-ai-playbook' },
+			],
 			sidebar: [
-				{ label: 'Get the book', link: '/pricing/' },
 				{
-					label: 'Free sample chapters',
+					label: 'Handbook',
 					items: [{ autogenerate: { directory: 'handbook' } }],
 				},
+				{ label: 'GitHub repo', link: 'https://github.com/gurpreet-ios/ios-ai-playbook' },
 			],
 		}),
 	],

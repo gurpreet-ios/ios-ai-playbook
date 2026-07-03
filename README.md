@@ -12,15 +12,17 @@ This is not a book about "vibe coding." It is a working resource for operating l
 
 | Section | Contents |
 | :-- | :-- |
-| [`handbook/`](handbook/) | The 37-chapter handbook (below) + the dated [Model Landscape appendix](handbook/appendix-model-landscape.md) |
-| [`prompts/`](prompts/README.md) | 41 production prompt systems, chapter-mapped — architecture, review, performance, debugging, testing, security, release |
+| [`handbook/`](handbook/) | The 38-chapter handbook (below) + the dated [Model Landscape appendix](handbook/appendix-model-landscape.md) |
+| [`prompts/`](prompts/README.md) | 42 production prompt systems, chapter-mapped — architecture, review, performance, debugging, testing, security, release |
+| [`skills/`](skills/README.md) | 8 installable Agent Skills (`SKILL.md`) — the highest-leverage prompts packaged so your agent triggers them itself (Chapter 19c) |
 | [`adrs/`](adrs/README.md) | 13 Architecture Decision Records, each usable as an AI context anchor |
 | [`architecture-breakdowns/`](architecture-breakdowns/README.md) | Seed blueprints for deconstructing real products (Uber, Spotify, Instagram) with prompt sequences |
 | [`interview-playbooks/`](interview-playbooks/README.md) | Structured mock interviews (machine coding, architecture, code review) |
-| [`sample-apps/`](sample-apps/) | Three Swift sample apps — a deliberate prompting-strategy trilogy (below) |
+| [`sample-apps/`](sample-apps/) | Four Swift sample apps — a deliberate prompting-strategy set (below) |
 | [`templates/`](templates/) | RFC and PR templates designed for both human and machine reviewers |
 | [`tools/`](tools/) | Book build scripts and a reference MCP server (`doc-mcp-server/`) |
-| [`site/`](site/) | Astro Starlight teaser site — free sample chapters + the paid-PDF funnel (see [`MONETIZATION.md`](MONETIZATION.md)) |
+| [`newsletter/`](newsletter/README.md) | Substack post drafts — the community-first distribution pipeline (see [`MONETIZATION.md`](MONETIZATION.md)) |
+| [`site/`](site/) | Astro Starlight site — the full handbook, free (chapters synced via `tools/sync-site-chapters.py`; see [`MONETIZATION.md`](MONETIZATION.md)) |
 
 Improvement work is tracked in [`BACKLOG.md`](BACKLOG.md).
 
@@ -69,6 +71,7 @@ New to iOS or overwhelmed by "Actor Isolation" and "Context Windows"? Don't pani
 ### Part VIII — Agentic Engineering
 - [Chapter 19: The Agentic IDE](handbook/19-agentic-ide.md)
 - [Chapter 19b: Structuring Agent Rules](handbook/19b-structuring-agent-rules.md)
+- [Chapter 19c: Packaging Workflows as Agent Skills](handbook/19c-agent-skills.md)
 - [Chapter 20: Terminal, Browser, and CI Agents](handbook/20-terminal-browser-ci-agents.md)
 - [Chapter 21: Tool Calling & MCP](handbook/21-tool-calling-mcp.md)
 
@@ -99,15 +102,16 @@ New to iOS or overwhelmed by "Actor Isolation" and "Context Windows"? Don't pani
 ### Appendix
 - [The Model Landscape](handbook/appendix-model-landscape.md) — the only place model names live, dated and bumpable.
 
-## The sample apps: a prompting-strategy trilogy
+## The sample apps: a prompting-strategy set
 
-The three apps in [`sample-apps/`](sample-apps/) are **not** three random demos — each was generated with a different prompting strategy, and each keeps the actual prompts next to the code in `_prompts/` directories so you can replay the build:
+The four apps in [`sample-apps/`](sample-apps/) are **not** four random demos — each was generated with a different prompting strategy, and each keeps the actual prompts next to the code in `_prompts/` directories so you can replay the build:
 
 | App | Strategy | When to use it |
 | :-- | :-- | :-- |
 | [`uber-clone`](sample-apps/uber-clone/) | **Descriptive** — long, constraint-heavy prompts | Complex domains where architectural control matters most |
 | [`spotify-clone`](sample-apps/spotify-clone/) | **Ultra-concise** — fast, authoritative commands | Under time pressure (live machine-coding interviews) |
 | [`music-interview-app`](sample-apps/music-interview-app/) | **Balanced** — upfront `.cursorrules` + short per-file prompts | The recommended default; read its README first |
+| [`movie-search-uikit`](sample-apps/movie-search-uikit/) | **Balanced + decision log** — `.cursorrules` + per-layer prompts + a live [`DECISIONS.md`](sample-apps/movie-search-uikit/DECISIONS.md) | UIKit/MVVM-C interviews (the legacy-stack round); proving the architecture is *yours* |
 
 ## How to use this playbook
 
