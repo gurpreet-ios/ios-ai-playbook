@@ -29,8 +29,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Use the newest Xcode on the runner image. Pinning a version (the
+      # previous 16.2 pin) breaks when the image drops that Xcode's paired
+      # simulator runtime — the newest Xcode always has its runtime present.
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app || sudo xcode-select -s /Applications/Xcode.app
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          sudo xcode-select -s "${XCODE:-/Applications/Xcode.app}"
+          xcodebuild -version
 
       - name: Pick a simulator
         id: sim
