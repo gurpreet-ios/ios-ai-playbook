@@ -21,8 +21,8 @@ This is not a book about "vibe coding." It is a working resource for operating l
 | [`sample-apps/`](sample-apps/) | Four Swift sample apps — a deliberate prompting-strategy set (below) |
 | [`templates/`](templates/) | RFC and PR templates designed for both human and machine reviewers |
 | [`tools/`](tools/) | Book build scripts and a reference MCP server (`doc-mcp-server/`) |
-| [`newsletter/`](newsletter/README.md) | Substack post drafts — the community-first distribution pipeline (see [`MONETIZATION.md`](MONETIZATION.md)) |
-| [`site/`](site/) | Astro Starlight site — the full handbook, free (chapters synced via `tools/sync-site-chapters.py`; see [`MONETIZATION.md`](MONETIZATION.md)) |
+| [`newsletter/`](newsletter/README.md) | Substack post drafts — the community-first distribution pipeline 
+| [`site/`](site/) | Astro Starlight site — the full handbook, free (chapters synced via `tools/sync-site-chapters.py`;
 
 Improvement work is tracked in [`BACKLOG.md`](BACKLOG.md).
 
