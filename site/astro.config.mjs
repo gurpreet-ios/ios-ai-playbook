@@ -17,6 +17,9 @@ export default defineConfig({
 				},
 				{ label: 'GitHub repo', link: 'https://github.com/gurpreet-ios/ios-ai-playbook' },
 			],
+			components: {
+				Head: './src/components/Head.astro',
+			},
 		}),
 	],
 });
