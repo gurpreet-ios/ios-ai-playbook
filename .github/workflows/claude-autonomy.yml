@@ -1,18 +1,22 @@
-# claude-autonomy.yml — the Level 3 substrate (see handbook/20b-autonomy-levels.md)
+# claude-autonomy.yml — the Level 4 escalation (see handbook/20b-autonomy-levels.md)
 #
-# This is the CI agent that lets this repo operate at Autonomy Level 3
-# (Delegated): on each pull request it reads the repo's rules (AGENTS.md + adrs/),
-# reviews the diff for architecture drift, and — when a maintainer @-mentions it —
-# can make a bounded fix, self-verify via the sample-apps CI, and push to the PR
-# branch. A human still reviews and merges. It is the Chapter 20 "Automated
-# Reviewer / Auto-Fixer" wired to this repo's Autonomy Contract.
+# The day-to-day Level 3 (Delegated) loop runs LOCALLY: a terminal agent on a
+# developer's Mac closes the build/test loop (`xcodebuild test`, the site sync)
+# and a human reviews the PR. This workflow is the rung above — the
+# SELF-TRIGGERING (Level 4) version. On each pull request it reads the repo's
+# rules (AGENTS.md + adrs/), reviews the diff for architecture drift, and — when a
+# maintainer @-mentions it — can make a bounded fix, self-verify via the
+# sample-apps CI, and push to the PR branch. A human still reviews and merges. It
+# is the Chapter 20 "Automated Reviewer / Auto-Fixer" wired to this repo's
+# Autonomy Contract.
 #
 # ─── KILL SWITCH — this workflow is INERT until a maintainer enables it ───────
 #   1. Add the repository SECRET  ANTHROPIC_API_KEY   (Settings → Secrets → Actions)
 #   2. Add the repository VARIABLE CLAUDE_AUTONOMY_ENABLED = true  (Settings → Variables)
 # Remove either one — flip the variable to anything but "true", or delete the
-# secret — and the agent stops running. That one-action revocability is what keeps
-# this Level 3 (human arms it, human can disarm it) rather than Level 4.
+# secret — and the agent stops running. Self-triggering on every PR is what makes
+# this Level 4; shipping it inert (a human must arm it, and can disarm it in one
+# action) is what keeps a human in charge of the escalation.
 #
 # Precondition (enforced outside this file): `main` must be a PROTECTED branch
 # with required reviews + required status checks, so the agent can only ever

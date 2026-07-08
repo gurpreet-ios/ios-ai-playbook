@@ -74,16 +74,24 @@ full loop and open a PR, and a human reviews the outcome. This section is that
 contract, made explicit so it can be delegated instead of living in a maintainer's
 head.
 
+**The primary mode is local.** A terminal agent on a developer's Mac closes the
+build/test loop and a human reviews the PR — no CI, no secret. The self-triggering
+CI workflow (`.github/workflows/claude-autonomy.yml`) is the opt-in **Level-4**
+escalation, and it is inert until a maintainer arms it (see the kill switch below).
+
 ### An agent operating here MAY, without step-by-step approval:
 - plan and make a **bounded, clearly-scoped** change;
 - edit files, run the build and tests, and **fix its own build/test failures**;
 - run `tools/sync-site-chapters.py` and commit the generated site output;
 - open a pull request and summarize what it changed.
 
-### Definition of done (the agent must self-verify before asking for review):
-- Sample-app changes: **build + test green on the iOS Simulator** (the check that
-  `sample-apps.yml` runs). Don't hand back a red PR.
-- Handbook changes: **site re-synced** and cross-references resolve.
+### Definition of done (the agent must self-verify *locally* before asking for review):
+Run the loop yourself before handing back a PR — don't outsource the first check to CI.
+- Sample-app changes: **build + test green on the iOS Simulator** — `xcodebuild test`
+  on the touched app (the same check `sample-apps.yml` re-runs in CI). Don't hand
+  back a red PR.
+- Handbook changes: **site re-synced** — run `python3 tools/sync-site-chapters.py`,
+  commit the result so the tree is clean, and confirm cross-references resolve.
 - The change stayed **inside its stated scope**.
 
 ### An agent MUST stop and escalate (ask a human) when:
@@ -102,10 +110,12 @@ head.
 - **Protected paths — do not edit autonomously:** `MONETIZATION.md`,
   `LICENSE`, `.github/workflows/*` (changing the agent's own guardrails or CI is a
   human decision), and this file, `AGENTS.md`.
-- **Kill switch:** the CI agent in `claude-autonomy.yml` is inert unless a
-  maintainer sets the `CLAUDE_AUTONOMY_ENABLED` repository variable to `true` and
-  provides the `ANTHROPIC_API_KEY` secret. Flip the variable off to revoke
-  autonomy in one action.
+- **Kill switch:** locally, autonomy is revoked by interrupting or not starting
+  the agent — the developer arms it and reviews every PR (the day-to-day Level-3
+  mode). The self-triggering CI agent in `claude-autonomy.yml` is the **Level-4**
+  escalation and is inert unless a maintainer sets the `CLAUDE_AUTONOMY_ENABLED`
+  repository variable to `true` and provides the `ANTHROPIC_API_KEY` secret; flip
+  the variable off to revoke it in one action.
 
 > This contract is the difference between *delegated* and *unsupervised*. If a
 > requested task doesn't fit inside it, the right move is to ask — raising the

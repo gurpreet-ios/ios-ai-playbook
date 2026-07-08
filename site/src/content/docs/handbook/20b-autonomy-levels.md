@@ -109,15 +109,23 @@ Delegation is not abdication. Moving to Level 3 means writing down, explicitly, 
 
 ---
 
-## 5. Running *this repository* at Level 3
+## 5. Running *this repository* at Level 3 — locally
 
-This chapter is dogfooded. The repo you are reading was moved from Level 2 to Level 3 by adding exactly the three-part substrate above — nothing more:
+This chapter is dogfooded, and the primary rung is **local**. Level 3 for iOS lives where the simulator lives: on your Mac, driven by a terminal agent (Claude Code, Cursor) — *not* in CI. That matters, because the loop the agent must close ([section 3](#3-you-cannot-skip-the-substrate-three-preconditions-for-level-3)) is a build-and-test loop, and on iOS that loop is seconds away on your own machine and minutes-plus-money away on a macOS runner. The three-part substrate maps onto three things a developer already has in hand:
 
-1. **The closeable loop** already existed: [`.github/workflows/sample-apps.yml`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/.github/workflows/sample-apps.yml) builds and tests all four sample apps on the iOS Simulator. That CI *is* the agent's definition of done for any sample-app change — the eyes it verifies its own work with.
-2. **The guardrails, written down:** [`AGENTS.md`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/AGENTS.md) at the repo root is the single source of truth from [Chapter 19b](/handbook/19b-structuring-agent-rules/), extended with an explicit **Autonomy Contract** — the scope, the definition of done (handbook edits must re-run `tools/sync-site-chapters.py`; sample-app edits must stay build-and-test green), the escalation triggers, the protected paths, and the kill switch.
-3. **The substrate that executes it:** [`.github/workflows/claude-autonomy.yml`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/.github/workflows/claude-autonomy.yml) runs [`anthropics/claude-code-action`](https://github.com/anthropics/claude-code-action) on each PR. It reads `AGENTS.md` and the ADRs, reviews the diff for architecture drift, and — for a failing sample-app test — can push a fix and let the sample-apps CI re-verify it. It is the [Chapter 20](/handbook/20-terminal-browser-ci-agents/) Automated Reviewer and Auto-Fixer, wired to *this* repo's rules.
+1. **The closeable loop runs on your machine.** The agent's definition of done is a command it runs *itself*, locally, before it asks you to look:
+   - a handbook change is done when `python3 tools/sync-site-chapters.py` leaves the tree clean (site back in sync);
+   - a sample-app change is done when `xcodebuild test` goes green on a booted simulator — the *same* checks [`.github/workflows/sample-apps.yml`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/.github/workflows/sample-apps.yml) runs in CI, just without the runner queue.
 
-The kill switch is deliberate and load-bearing: the workflow is **inert until a maintainer sets both the `ANTHROPIC_API_KEY` secret and the `CLAUDE_AUTONOMY_ENABLED` repository variable to `true`.** That is Level 3, not Level 4 — the human still arms it, still reviews every merge, and can disarm it by flipping one variable. Autonomy you can revoke in one click is the only autonomy worth granting.
+   Teams usually collapse these into a single `verify` command so "am I done?" is one keystroke; that script *is* the local Level-3 substrate, and it's the highest-leverage thing you can build before delegating.
+2. **The guardrails are written down:** [`AGENTS.md`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/AGENTS.md) at the repo root is the single source of truth from [Chapter 19b](/handbook/19b-structuring-agent-rules/), extended with an explicit **Autonomy Contract** — the scope, the definition of done (the loop above), the escalation triggers, the protected paths, and the kill switch. The agent reads it before it acts, so the rules don't have to live in your head while you're out of the loop.
+3. **You arm it and review the outcome.** There is no secret and no runner: you start the terminal agent, hand it a bounded task, let it close the loop locally, and review the PR it produces. That is Level 3 in its purest form — the human is the exception handler and final reviewer, and the "kill switch" is simply interrupting, or not starting, the agent. Fast, free, and private: the loop is seconds, nothing leaves your machine, and there's no CI bill for the agent's retries.
+
+### The Level-4 escalation: the same rules, self-triggering in CI
+
+When you want the loop to run *without a human initiating it*, the repo ships the rung above: [`.github/workflows/claude-autonomy.yml`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/.github/workflows/claude-autonomy.yml) runs [`anthropics/claude-code-action`](https://github.com/anthropics/claude-code-action) on every pull request, reading the same `AGENTS.md` + ADRs, reviewing the diff for architecture drift, and auto-fixing a failing sample-app test — the [Chapter 20](/handbook/20-terminal-browser-ci-agents/) Automated Reviewer and Auto-Fixer. Self-triggering on a work source, with no human kicking it off, is the definition of **Level 4** ([section 2](#2-the-five-rungs)) — which is why it ships **inert**, gated behind a maintainer setting the `ANTHROPIC_API_KEY` secret and the `CLAUDE_AUTONOMY_ENABLED` variable to `true`.
+
+**Local Level 3 is the day-to-day rung; CI Level 4 is the opt-in escalation for when you're ready to take your hands off the trigger.** Climb it only once the local loop is boring — a fleet you can't watch is only as trustworthy as the definition of done it self-verifies against.
 
 ---
 
@@ -140,7 +148,7 @@ None of these block Level 3. They shape its boundaries — which is the whole di
 - [ ] **Protect `main`.** Required reviews + required status checks, so a delegated agent can only ever *propose*.
 - [ ] **Scope the first task tightly.** One clear boundary, one testable definition of done. Delegate the boring, well-fenced change first, not the architectural one.
 - [ ] **Set a fix-attempt / cost budget.** The agent hands back a diagnosis instead of looping forever.
-- [ ] **Add the kill switch.** One flag, off in one action.
+- [ ] **Keep the kill switch in reach.** Locally that's interrupting the agent; for the CI escalation it's one flag, off in one action.
 - [ ] **Review outcomes, log the misses.** When the agent's PR is wrong, the fix is usually a missing ADR or a loose definition of done — improve the *substrate*, not just that one PR. That is how Level 3 compounds.
 
 ---
