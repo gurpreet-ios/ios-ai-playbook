@@ -12,7 +12,7 @@ This is not a book about "vibe coding." It is a working resource for operating l
 
 | Section | Contents |
 | :-- | :-- |
-| [`handbook/`](handbook/) | The 38-chapter handbook (below) + the dated [Model Landscape appendix](handbook/appendix-model-landscape.md) |
+| [`handbook/`](handbook/) | The 39-chapter handbook (below) + the dated [Model Landscape appendix](handbook/appendix-model-landscape.md) |
 | [`prompts/`](prompts/README.md) | 42 production prompt systems, chapter-mapped — architecture, review, performance, debugging, testing, security, release |
 | [`skills/`](skills/README.md) | 8 installable Agent Skills (`SKILL.md`) — the highest-leverage prompts packaged so your agent triggers them itself (Chapter 19c) |
 | [`adrs/`](adrs/README.md) | 13 Architecture Decision Records, each usable as an AI context anchor |
@@ -21,6 +21,7 @@ This is not a book about "vibe coding." It is a working resource for operating l
 | [`sample-apps/`](sample-apps/) | Four Swift sample apps — a deliberate prompting-strategy set (below) |
 | [`templates/`](templates/) | RFC and PR templates designed for both human and machine reviewers |
 | [`tools/`](tools/) | Book build scripts and a reference MCP server (`doc-mcp-server/`) |
+| [`AGENTS.md`](AGENTS.md) | The single source of truth for agents working in this repo — architectural laws + the Level-3 **Autonomy Contract** (Chapter 20b). The repo dogfoods its own delegated-agent setup. |
 | [`newsletter/`](newsletter/README.md) | Substack post drafts — the community-first distribution pipeline 
 | [`site/`](site/) | Astro Starlight site — the full handbook, free (chapters synced via `tools/sync-site-chapters.py`;
 
@@ -73,6 +74,7 @@ New to iOS or overwhelmed by "Actor Isolation" and "Context Windows"? Don't pani
 - [Chapter 19b: Structuring Agent Rules](handbook/19b-structuring-agent-rules.md)
 - [Chapter 19c: Packaging Workflows as Agent Skills](handbook/19c-agent-skills.md)
 - [Chapter 20: Terminal, Browser, and CI Agents](handbook/20-terminal-browser-ci-agents.md)
+- [Chapter 20b: The Autonomy Ladder](handbook/20b-autonomy-levels.md) — from supervised (Level 2) to delegated (Level 3) agents
 - [Chapter 21: Tool Calling & MCP](handbook/21-tool-calling-mcp.md)
 
 ### Part IX — Documentation & Reference

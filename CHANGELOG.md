@@ -2,6 +2,20 @@
 
 All notable changes to the playbook, for readers and PDF buyers. Dates are release dates of the content, not of individual commits.
 
+## 2026-07-08 — Autonomy Level 3: the playbook delegates, and dogfoods it
+
+The handbook grows to 39 chapters, and the repo stops only *teaching* agentic workflows — it starts *running* one. Headline: a new chapter names the autonomy ladder, diagnoses the playbook as Level 2 (supervised), and moves it to Level 3 (delegated) by adding the three-part substrate the chapter prescribes.
+
+### New chapter
+- **Ch 20b — The Autonomy Ladder:** the axis Chapter 3's seniority ladder isn't — *how much of the plan→edit→build→test→fix→review loop you delegate*, ranked Level 0–5 (SAE-style), with the honest boundary at Level 5. Diagnoses "Plan First" supervision (Ch 19) as Level 2 and its ceiling (your reading speed), then teaches the three preconditions for Level 3 — a closeable verification loop, written-down guardrails, and a bounded task with a testable definition of done — plus the operating contract (what the agent owns vs. what you keep), blast-radius limits, escalation triggers, and the iOS-specific reasons delegation is harder here (macOS runner cost, no cheap E2E, signing walls). Slots after Ch 20 via the `20b` insertion convention; wired into the README and cross-referenced from Ch 3/19/19b/20/30/32/35.
+
+### The repo now runs at Level 3 (dogfooding)
+- **`AGENTS.md` at the root:** the tool-agnostic single source of truth from Ch 19b — the repo's content/Swift laws plus an explicit **Autonomy Contract** (§4): what an agent may do without step-by-step approval, its definition of done (sample-app changes stay build+test green; handbook edits re-run the site sync), the escalation triggers, the protected paths, and the kill switch.
+- **`.github/workflows/claude-autonomy.yml`:** the Level-3 substrate — `anthropics/claude-code-action` reviewing each PR against `AGENTS.md` + the ADRs and, on request, making a bounded self-verified fix. Ships **inert**: it does nothing until a maintainer sets the `CLAUDE_AUTONOMY_ENABLED` repo variable to `true` and provides an `ANTHROPIC_API_KEY` secret — one-action revocable, which is what keeps it Level 3 (human-armed) rather than Level 4.
+
+### Housekeeping
+- Chapter count corrected 38 → 39 (README, site landing + card); site prompt-count corrected 41 → 42 to match the library.
+
 ## 2026-07-03 — Fourth sample app: the UIKit MVVM-C interview
 
 The prompting-strategy trilogy becomes a quartet, and the new app adds the habit the others only implied: a live decision log.

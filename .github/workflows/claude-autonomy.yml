@@ -1,0 +1,90 @@
+# claude-autonomy.yml — the Level 3 substrate (see handbook/20b-autonomy-levels.md)
+#
+# This is the CI agent that lets this repo operate at Autonomy Level 3
+# (Delegated): on each pull request it reads the repo's rules (AGENTS.md + adrs/),
+# reviews the diff for architecture drift, and — when a maintainer @-mentions it —
+# can make a bounded fix, self-verify via the sample-apps CI, and push to the PR
+# branch. A human still reviews and merges. It is the Chapter 20 "Automated
+# Reviewer / Auto-Fixer" wired to this repo's Autonomy Contract.
+#
+# ─── KILL SWITCH — this workflow is INERT until a maintainer enables it ───────
+#   1. Add the repository SECRET  ANTHROPIC_API_KEY   (Settings → Secrets → Actions)
+#   2. Add the repository VARIABLE CLAUDE_AUTONOMY_ENABLED = true  (Settings → Variables)
+# Remove either one — flip the variable to anything but "true", or delete the
+# secret — and the agent stops running. That one-action revocability is what keeps
+# this Level 3 (human arms it, human can disarm it) rather than Level 4.
+#
+# Precondition (enforced outside this file): `main` must be a PROTECTED branch
+# with required reviews + required status checks, so the agent can only ever
+# propose on a PR branch, never write to main. See AGENTS.md §4 "Hard limits".
+
+name: claude-autonomy
+
+on:
+  # Autonomous review of every PR's diff against the repo's written rules.
+  pull_request:
+    types: [opened, synchronize, reopened]
+  # Delegated fixes, on demand: a maintainer comments "@claude ..." on a PR/issue.
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+# Least privilege. `contents: write` lets the auto-fixer push to the PR *branch*;
+# branch protection on `main` (see header) is what keeps that safe.
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: claude-autonomy-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  delegated-agent:
+    # The kill switch. No variable set → job is skipped entirely, so the workflow
+    # is safe to merge in its default (disabled) state. `vars` (unlike `secrets`)
+    # is readable in an `if:` expression, which is why the flag is a variable.
+    if: ${{ vars.CLAUDE_AUTONOMY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run the delegated agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # The Level-3 work order. The agent reads the repo's rules itself
+          # (precondition #2 from Chapter 20b) instead of us re-stating them here.
+          prompt: |
+            You are the delegated CI agent for this repository, operating under
+            the Autonomy Contract in AGENTS.md §4. Read AGENTS.md and the relevant
+            files in adrs/ before doing anything.
+
+            On a pull_request event:
+              - Review the diff for architecture drift against AGENTS.md and the
+                ADRs (e.g. CoreData instead of SwiftData, a new third-party
+                dependency, model names outside the appendix, un-synced site docs).
+              - Post concise, specific inline review comments. Do not rewrite the
+                PR unasked; a review is the default action.
+
+            When a maintainer @-mentions you asking for a fix:
+              - Make the SMALLEST change that satisfies the request and stays
+                inside its stated scope.
+              - Self-verify (definition of done, AGENTS.md §4): sample-app changes
+                must build + test green on the simulator; handbook edits must be
+                re-synced with `python3 tools/sync-site-chapters.py`.
+              - If the loop won't close after a few attempts, or the task hits any
+                escalation trigger in AGENTS.md §4, STOP and reply with a
+                diagnosis instead of pushing a broken or out-of-scope change.
+
+            Never edit the protected paths listed in AGENTS.md §4 (this workflow,
+            other workflows, AGENTS.md, LICENSE, MONETIZATION.md) autonomously.
+          # Bound the agent's tools/turns. Tighten as you trust it more.
+          claude_args: |
+            --max-turns 25
