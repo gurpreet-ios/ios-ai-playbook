@@ -120,11 +120,41 @@ With well-formed work orders, the back half is largely the Chapter 20b machinery
 
 - **S3 — self-iterating code** is the local Level-3 loop from [Chapter 20b §5](/handbook/20b-autonomy-levels/#5-running-this-repository-at-level-3--locally): per subtask, plan → edit → `xcodebuild test` → read failures → fix → green, driven against the tests-first target. Run it **locally**, not in CI — self-iteration on macOS runners is a runaway bill.
 - **S4 — raise PR** uses the GitHub MCP and [`templates/pr-template.md`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/templates/pr-template.md), whose *AI Generation Context* and *Machine Review Checklist* the agent auto-fills, linking the Jira story.
-- **S5 — code review** is the Level-4 reviewer in [`claude-autonomy.yml`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/.github/workflows/claude-autonomy.yml): it reviews the diff against `AGENTS.md` and the ADRs ([Chapter 14](/handbook/14-code-review/)), posts inline comments, and iterates on review replies — with a human as the final approver at **Gate B**, who owns what ships.
+- **S5 — code review** is the Level-4 reviewer in [`claude-autonomy.yml`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/.github/workflows/claude-autonomy.yml): it reviews the diff against `AGENTS.md` and the ADRs ([Chapter 14](/handbook/14-code-review/)) and posts inline comments, with a human as the final approver at **Gate B**, who owns what ships. What happens to those comments — how they re-enter the loop *without* eroding the frozen contract — is the whole of the next section.
 
 ---
 
-## 8. The two gates you never automate
+## 8. S5 → S3: the review loop-back
+
+A straight line isn't a pipeline; the cycle is what makes it Level 4. Review comments and CI failures are new *unknowns* discovered after the contract froze, and they have to re-enter the loop — but a naïve loop-back quietly destroys everything Gate A bought you.
+
+**The core risk: an agent complies with *any* comment.** Left unguarded, a coding agent treats every review comment as a command. A reviewer muses *"would a protocol be cleaner here?"* — a rhetorical question — and the agent rewrites the architecture. That is how a frozen contract erodes, one polite comment at a time. So the loop-back's first job isn't *responding* to feedback; it's **classifying** it.
+
+**Classify feedback the way S1 classified questions — by cost of reversal.** The same economic test that split 🔴-blocking from 🟡-assumed at the front of the pipeline decides what the agent may touch at the back:
+
+| Feedback | Example | Loop-back action |
+| :-- | :-- | :-- |
+| **Mechanical / objective** | CI red, a failing test, lint, an ADR-drift flag from the machine-review checklist | **Auto-iterate** — the bounded S3 loop: fix, self-verify, push. No human. This is the [Chapter 20](/handbook/20-terminal-browser-ci-agents/) auto-fixer. |
+| **Bounded judgment** | "extract a helper", "rename for clarity" | Auto-iterate *if* the fix is cheaply reversible and in-scope. |
+| **Contract-level judgment** | "reconsider the approach", "why not sync instead of local?" | **Re-arm Gate A** — this reopens a frozen decision; escalate, don't silently comply. |
+| **A question, not a request** | "why debounce here?" | **Answer in-thread; touch no code.** |
+
+A comment whose fix is bounded and machine-verifiable, the agent owns. A comment that implies throwing away work or changing the spec is a Gate-A decision wearing a review-comment costume — it goes back to the human.
+
+Four disciplines keep the loop-back honest:
+
+- **Pushback is allowed — the ADR is the authority, not the last comment.** The agent may *decline* a change with a rationale that cites an ADR (*"per the persistence ADR this stays local; syncing is out of this RFC's scope"*). Blind compliance is how architecture drifts; [`AGENTS.md`](https://github.com/gurpreet-ios/ios-ai-playbook/blob/main/AGENTS.md) and the ADRs outrank the thread.
+- **A round budget, or you get a review war.** Requests → push → requests again is an unbounded [cost sink (Chapter 35)](/handbook/35-agentic-security-and-cost/). Bound it to *N* rounds, like S3's fix-attempt budget; past *N*, stop and hand to a human.
+- **The agent replies; only a human resolves.** The agent addresses a comment and responds, but *resolving* the thread and approving is Gate B. An agent marking its own comments resolved is a smell.
+- **Jira status is the "whose turn is it" source of truth.** `In Review → Changes Requested → In Progress → In Review → Done`. The loop-back is that state machine cycling, and it's what stops two workers grabbing the same subtask.
+
+**The substrate is events, not polling.** CI failures and review comments arrive as *events* that wake the agent, which re-diagnoses and re-kicks the affected subtask — never a poll loop. The repo's own `claude-autonomy.yml` plus a PR-activity subscription is the concrete wiring; the mechanical-feedback lane simply *is* the Chapter 20 auto-fixer, now fenced by the classifier above.
+
+The payoff: mechanical feedback iterates freely and fast, while **contract-level feedback re-arms Gate A and the merge stays human.** The cost-of-reversal test now governs the whole line — one idea applied three times: S1 questions, the S3 fix-attempt budget, and these review comments.
+
+---
+
+## 9. The two gates you never automate
 
 Everything between S1 and S5 is delegable. Two decisions are not, for product work, ever:
 
@@ -135,7 +165,7 @@ Hold those two and the pipeline is aggressive but *legible* — a human sets the
 
 ---
 
-## 9. The iOS reality check
+## 10. The iOS reality check
 
 The same constraints that shape Level 3 shape the whole pipeline, and each defines a boundary rather than a blocker:
 
@@ -145,7 +175,7 @@ The same constraints that shape Level 3 shape the whole pipeline, and each defin
 
 ---
 
-## 10. Don't build it all at once
+## 11. Don't build it all at once
 
 The failure mode is jumping straight to a self-triggering "Run." Earn each stage:
 
