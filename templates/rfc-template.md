@@ -27,12 +27,19 @@ Identify how this system can break.
 - **Concurrency:** Can two users mutate this state simultaneously?
 - **Scale:** Does this hold up if the array has 100,000 items?
 
-## 5. Alternative Solutions Considered
+## 5. Acceptance Criteria
+The **machine-checkable** definition of done. Write each criterion as Given / When / Then and map it to the test that proves it. In an autonomous pipeline (see Chapter 20c) these become the failing tests the implementation is driven to make pass, and freezing them is what a human approves at "Gate A" — so keep them testable, not aspirational.
+- **AC-1:** *Given* [initial state], *when* [action], *then* [observable, assertable result]. → `SomeTests.testThing`
+- **AC-2:** ...
+
+*A criterion no test can check is not an acceptance criterion — it's a visual/UX concern. Move it to §4 or the PR's Human Review Checklist, and flag it for human sign-off rather than the automated loop.*
+
+## 6. Alternative Solutions Considered
 What other approaches did you think of, and why did you discard them? (Crucial for preventing AI from suggesting these discarded ideas later).
 
-## 6. Security & Privacy
+## 7. Security & Privacy
 - Are we logging PII?
 - Is this data encrypted at rest?
 
-## 7. Rollout Plan
+## 8. Rollout Plan
 Is this behind a feature flag? Can we safely rollback the database migration if it fails?

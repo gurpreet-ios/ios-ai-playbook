@@ -2,6 +2,16 @@
 
 All notable changes to the playbook, for readers and PDF buyers. Dates are release dates of the content, not of individual commits.
 
+## 2026-07-08 — Chapter 20c: the autonomous delivery pipeline (Level 4)
+
+The handbook grows to 40 chapters. Where Ch 20b delegated a single bounded task (Level 3), 20c chains the whole delivery line and names it honestly as Level 4.
+
+### New chapter
+- **Ch 20c — The Autonomous Delivery Pipeline:** vague user story → RFC → iOS tasks in Jira → self-iterating code → PR → code review, framed as a [prompt chain (Ch 8)](handbook/08-prompt-chaining.md) across Jira/GitHub MCP. The spine is a **cost-of-defect** argument — a wrong assumption is never a 1× waste but *wrong work plus redo*, compounding the further right it's caught — which is why the chapter's weight is on the **front** of the pipeline, not the code generation. Deep treatment of **S1 (story → a testable contract)** and **S2 (contract → layered iOS work orders)**: ground-first to minimize questions, classify every question by **cost of reversal** (🔴 blocking vs 🟡 assumed-with-default), a **strict, machine-enforced Gate A** (hard-block on any open 🔴; batched into one round; a machine-readable `gate_a: BLOCKED/READY` status that refuses to spawn Jira tasks until clear), tests-first topological decomposition by architecture layer, and the two human gates (spec, merge) that never automate. Worked "add favorites" example throughout; iOS reality check (no cheap E2E, signing walls, macOS runner cost) and a crawl/walk/run adoption path. Cross-referenced to Ch 3/8/14/20/20b/21/26/35.
+
+### Supporting change
+- **`templates/rfc-template.md` gains an Acceptance Criteria section** — machine-checkable Given/When/Then criteria mapped to tests, the linchpin artifact Gate A freezes and S3's loop drives to green. Sections renumbered (Acceptance Criteria is now §5).
+
 ## 2026-07-08 — Autonomy Level 3: the playbook delegates, and dogfoods it
 
 The handbook grows to 39 chapters, and the repo stops only *teaching* agentic workflows — it starts *running* one. Headline: a new chapter names the autonomy ladder, diagnoses the playbook as Level 2 (supervised), and moves it to Level 3 (delegated) by adding the three-part substrate the chapter prescribes.
