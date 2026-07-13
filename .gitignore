@@ -36,3 +36,9 @@ xcuserdata/
 # SwiftPM build artifacts
 .build/
 .swiftpm/
+
+# fastlane (sample-apps) generated output
+sample-apps/fastlane/report.xml
+sample-apps/fastlane/README.md
+sample-apps/fastlane/test_output/
+sample-apps/vendor/bundle/

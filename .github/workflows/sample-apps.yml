@@ -7,13 +7,18 @@ on:
   pull_request:
     paths: ['sample-apps/**', '.github/workflows/sample-apps.yml']
 
-# Chapter 30's gate 1 applied to the book's own code: all sample apps
-# must build for the iOS Simulator and pass their Swift Testing
-# suites. The apps are the playbook's proof — a broken sample is a
-# credibility bug, not a code bug.
+# Chapter 30's gate 1 applied to the book's own code: all sample apps must
+# build for the iOS Simulator and pass their Swift Testing suites. The apps are
+# the playbook's proof — a broken sample is a credibility bug, not a code bug.
+#
+# Runner split (see sample-apps/CI.md for the "why" and runner setup):
+#   * pull_request -> free GitHub-hosted macos-15 (reproducible, always-on,
+#     safe for fork PRs since untrusted code never touches a personal machine).
+#   * push to main -> a self-hosted runner (a local Mac), used purely as a
+#     learning exercise. Real CI would stay on GitHub-hosted Macs.
 jobs:
   build-and-test:
-    runs-on: macos-15
+    runs-on: ${{ github.event_name == 'push' && fromJSON('["self-hosted", "macOS"]') || 'macos-15' }}
     strategy:
       fail-fast: false
       matrix:
@@ -26,30 +31,29 @@ jobs:
             scheme: SpotifyClone
           - app: uber-clone
             scheme: UberClone
+    defaults:
+      run:
+        working-directory: sample-apps
     steps:
       - uses: actions/checkout@v4
 
-      # Use the newest Xcode on the runner image. Pinning a version (the
-      # previous 16.2 pin) breaks when the image drops that Xcode's paired
-      # simulator runtime — the newest Xcode always has its runtime present.
+      # Point the build at the newest installed Xcode WITHOUT sudo. `sudo
+      # xcode-select` would hang on a self-hosted Mac that lacks passwordless
+      # sudo; exporting DEVELOPER_DIR works identically on hosted and local
+      # runners. On the self-hosted Mac, symlink your Xcode into /Applications
+      # (see sample-apps/CI.md) so this resolves it.
       - name: Select Xcode
         run: |
           XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
-          sudo xcode-select -s "${XCODE:-/Applications/Xcode.app}"
-          xcodebuild -version
+          XCODE="${XCODE:-/Applications/Xcode.app}"
+          echo "DEVELOPER_DIR=$XCODE/Contents/Developer" >> "$GITHUB_ENV"
+          "$XCODE/Contents/Developer/usr/bin/xcodebuild" -version
 
-      - name: Pick a simulator
-        id: sim
-        run: |
-          UDID=$(xcrun simctl list devices available --json \
-            | python3 -c "import json,sys; devs=[d for v in json.load(sys.stdin)['devices'].values() for d in v if 'iPhone' in d['name']]; print(devs[-1]['udid'])")
-          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+      - name: Install fastlane
+        run: bundle install
 
+      # The lane wraps `xcodebuild test` (fastlane's scan can't drive a bare
+      # SwiftPM package) and resolves an available simulator UDID itself, so no
+      # separate simulator-pick step is needed.
       - name: Build and test ${{ matrix.app }}
-        working-directory: sample-apps/${{ matrix.app }}
-        run: |
-          set -o pipefail
-          xcodebuild test \
-            -scheme ${{ matrix.scheme }} \
-            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
-            | tail -50
+        run: bundle exec fastlane test scheme:${{ matrix.scheme }} directory:${{ matrix.app }}
